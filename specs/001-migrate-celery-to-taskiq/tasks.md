@@ -21,9 +21,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 [P] Update `backend/requirements.txt` (remove celery, redis, flower; add taskiq, taskiq-aio-pika, taskiq-api-scheduler)
-- [ ] T002 Update `infra/docker-compose-local.yml` to replace RabbitMQ image with `rabbitmq:3-management` and expose port 15672
-- [ ] T003 Remove Flower and Redis services from `infra/docker-compose-local.yml`
+- [x] T001 [P] Update `backend/requirements.txt` (remove celery, redis, flower; add taskiq, taskiq-aio-pika, taskiq-api-scheduler)
+- [x] T002 Update `infra/docker-compose-local.yml` to replace RabbitMQ image with `rabbitmq:3-management` and expose port 15672
+- [x] T003 Remove Flower and Redis services from `infra/docker-compose-local.yml`
 
 ---
 
@@ -33,11 +33,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create TaskIQ broker initialization in `backend/broker.py` using `AioPikaBroker`
-- [ ] T005 Setup TaskIQ dependencies for SQLAlchemy async session in `backend/broker.py`
-- [ ] T006 Configure `SimpleRetryMiddleware` in `backend/broker.py` (3 attempts, exponential backoff)
-- [ ] T007 [P] Create TaskIQ Scheduler instance and register tasks in `backend/broker.py`
-- [ ] T008 Update `backend/entrypoint.sh` to support consolidated worker and scheduler startup commands
+- [x] T004 Create TaskIQ broker initialization in `backend/broker.py` using `AioPikaBroker`
+- [x] T005 Setup TaskIQ dependencies for SQLAlchemy async session in `backend/broker.py`
+- [x] T006 Configure `SimpleRetryMiddleware` in `backend/broker.py` (3 attempts, exponential backoff)
+- [x] T007 [P] Create TaskIQ Scheduler instance and register tasks in `backend/broker.py`
+- [x] T008 Update `backend/entrypoint.sh` to support consolidated worker and scheduler startup commands
 
 **Checkpoint**: Foundation ready - TaskIQ infrastructure is initialized and ready for task registration.
 
@@ -51,11 +51,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Refactor `backend/tasks.py` to use `@broker.task` instead of `@app.task`
-- [ ] T010 [US1] Update `backend/tasks.py` to use `TaskiqDepends` for database session injection (removing `asyncio.run` hacks)
-- [ ] T011 [US1] Implement `delete_old_process_logs_task` in `backend/tasks.py` (matching legacy scheduled task)
-- [ ] T012 [US1] Update `backend/background_tasks.py` service to use `task.kiq()` for all task invocations
-- [ ] T013 [US1] Update `backend/tasks.py` to include structured logging (e.g. `taskiq.logger`) for better visibility
+- [x] T009 [US1] Refactor `backend/tasks.py` to use `@broker.task` instead of `@app.task`
+- [x] T010 [US1] Update `backend/tasks.py` to use `TaskiqDepends` for database session injection (removing `asyncio.run` hacks)
+- [x] T011 [US1] Implement `delete_old_process_logs_task` in `backend/tasks.py` (matching legacy scheduled task)
+- [x] T012 [US1] Update `backend/background_tasks.py` service to use `task.kiq()` for all task invocations
+- [x] T013 [US1] Update `backend/tasks.py` to include structured logging (e.g. `taskiq.logger`) for better visibility
 
 **Checkpoint**: Core background tasks are operational via TaskIQ.
 
@@ -69,10 +69,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Remove `backend/celery_app.py` and any remaining Celery references in `backend/`
-- [ ] T015 [US2] Consolidate `celery_worker`, `celery_worker_json`, and `celery_beat` into `worker` and `scheduler` services in `infra/docker-compose-local.yml`
-- [ ] T016 [US2] Update environment variables in `infra/docker-compose-local.yml` (replace `CELERY_BROKER_URL` with `RABBITMQ_URL`)
-- [ ] T017 [US2] Verify `entrypoint.sh` correctly routes commands to `taskiq worker` and `taskiq scheduler`
+- [x] T014 [US2] Remove `backend/celery_app.py` and any remaining Celery references in `backend/`
+- [x] T015 [US2] Consolidate `celery_worker`, `celery_worker_json`, and `celery_beat` into `worker` and `scheduler` services in `infra/docker-compose-local.yml`
+- [x] T016 [US2] Update environment variables in `infra/docker-compose-local.yml` (replace `CELERY_BROKER_URL` with `RABBITMQ_URL`)
+- [x] T017 [US2] Verify `entrypoint.sh` correctly routes commands to `taskiq worker` and `taskiq scheduler`
 
 **Checkpoint**: Legacy infra removed and consolidated worker pool is live.
 
@@ -82,9 +82,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T018 Code cleanup of unused imports in `backend/tasks.py` and `backend/background_tasks.py`
-- [ ] T019 [P] Update architectural documentation in `README.md` to reflect TaskIQ/RabbitMQ stack
-- [ ] T020 Run `quickstart.md` validation to ensure local deployment works end-to-end
+- [x] T018 Code cleanup of unused imports in `backend/tasks.py` and `backend/background_tasks.py`
+- [x] T019 [P] Update architectural documentation in `README.md` to reflect TaskIQ/RabbitMQ stack
+- [x] T020 Run `quickstart.md` validation to ensure local deployment works end-to-end
 
 ---
 
