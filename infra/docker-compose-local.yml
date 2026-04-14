@@ -48,8 +48,8 @@ services:
     volumes:
       - ../backend:/app
     environment:
-      - POSTGRES_HOST=db
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
       - PYTHONUNBUFFERED=1
     command: [ "sh", "/app/entrypoint.sh", "worker" ]
     depends_on:
