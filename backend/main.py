@@ -1316,10 +1316,10 @@ async def process_media_background_endpoint(
             "original_filename": file.filename
         }
         
-        # Dispara a tarefa
-        task = process_kb_media_task.delay(log.id, kb_id, payload)
+        # Dispara a tarefa via TaskIQ
+        task_result = await process_kb_media_task.kiq(log.id, kb_id, payload)
         
-        log.task_id = task.id
+        log.task_id = task_result.task_id
         log.details["file_path"] = file_path
         db.add(log)
         await db.commit()
@@ -1499,9 +1499,9 @@ async def process_json_batch_endpoint(
                 "options": item_options
             }
             
-            task = process_kb_json_item_task.delay(log.id, kb_id, payload)
+            task_result = await process_kb_json_item_task.kiq(log.id, kb_id, payload)
             
-            log.task_id = task.id
+            log.task_id = task_result.task_id
             logs_started.append(log.id)
             
         await db.commit()

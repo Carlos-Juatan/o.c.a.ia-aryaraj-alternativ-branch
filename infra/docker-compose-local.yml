@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: pgvector/pgvector:pg14
+    image: pgvector/pgvector:pg16
     container_name: banco-agente-local
     env_file:
       - ../.env
@@ -15,25 +15,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  backend:
-    build: ../backend
-    container_name: backend-agente-local
-    env_file:
-      - ../.env
-    ports:
-      - "8002:8000"
-    volumes:
-      - ../backend:/app
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_agent_db}
-      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-1}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-*}
-      - PYTHONUNBUFFERED=1
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-    depends_on:
-      db:
-        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -50,76 +31,45 @@ services:
       timeout: 5s
       retries: 5
 
-  celery_worker:
+  backend:
     build: ../backend
-    container_name: celery-worker-agente-local
-    env_file:
-      - ../.env
-    volumes:
-      - ../backend:/app
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_agent_db}
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-      - PYTHONUNBUFFERED=1
-    command: celery -A celery_app worker --loglevel=info -Q celery
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  celery_worker_json:
-    build: ../backend
-    container_name: celery-worker-json-agente-local
-    env_file:
-      - ../.env
-    volumes:
-      - ../backend:/app
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_agent_db}
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-      - PYTHONUNBUFFERED=1
-    command: celery -A celery_app worker --loglevel=info -Q json_processing -c 1
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  celery_beat:
-    build: ../backend
-    container_name: celery-beat-agente-local
-    env_file:
-      - ../.env
-    volumes:
-      - ../backend:/app
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_agent_db}
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-      - PYTHONUNBUFFERED=1
-    command: celery -A celery_app beat --loglevel=info
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  flower:
-    build: ../backend
-    container_name: flower-agente-local
+    container_name: backend-agente-local
     env_file:
       - ../.env
     ports:
-      - "5555:5555"
+      - "8002:8000"
     volumes:
       - ../backend:/app
     environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_agent_db}
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-    command: celery -A celery_app flower --port=5555
+      - POSTGRES_HOST=db
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-1}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-*}
+      - PYTHONUNBUFFERED=1
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
     depends_on:
+      db:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  worker:
+    build: ../backend
+    container_name: worker-agente-local
+    env_file:
+      - ../.env
+    volumes:
+      - ../backend:/app
+    environment:
+      - POSTGRES_HOST=db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+      - PYTHONUNBUFFERED=1
+    command: ["sh", "/app/entrypoint.sh", "worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 
   frontend:
     build:
