@@ -85,6 +85,8 @@
 - [x] T018 Code cleanup of unused imports in `backend/tasks.py` and `backend/background_tasks.py`
 - [x] T019 [P] Update architectural documentation in `README.md` to reflect TaskIQ/RabbitMQ stack
 - [x] T020 Run `quickstart.md` validation to ensure local deployment works end-to-end
+- [x] T021 [P] Fix `worker` port conflict (remove 8002:8000) and ensure `backend` and `worker` depend on `postgres` in `infra/docker-compose-local.yml`
+- [x] T022 [P] Resolve frontend connectivity errors (ERR_EMPTY_RESPONSE) by verifying backend startup and CORS
 
 ---
 
