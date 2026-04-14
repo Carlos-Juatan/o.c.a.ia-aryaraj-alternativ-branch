@@ -105,7 +105,8 @@ async def verify_api_key(api_key: str = Security(_API_KEY_HEADER)):
     if not expected:
         return
     if api_key != expected:
-        logger.warning(f"AUTH: API Key inválida! Recebida: {api_key[:5]}...")
+        received = str(api_key)[:5] if api_key else "None"
+        logger.warning(f"AUTH: API Key inválida! Recebida: {received}...")
         raise HTTPException(
             status_code=403,
             detail="API Key inválida ou ausente. Envie o header X-API-Key correto."

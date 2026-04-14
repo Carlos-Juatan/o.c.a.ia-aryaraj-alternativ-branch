@@ -13,6 +13,9 @@
 - Q: How should TaskIQ handle temporary failures when calling external APIs? → A: Enable automatic retries with exponential backoff (3 attempts)
 - Q: Do you want to preserve the scheduled log cleanup task using the TaskIQ scheduler? → A: Yes, implement using TaskIQ Scheduler
 - Q: Should we maintain separate task queues for different processing types? → A: No, consolidate into a single shared worker pool
+- Q: Keep current ports (8002 for backend, 5300 for frontend)? → A: Yes, do not change to 8000/5173.
+- Q: Should backend and worker depend on the external postgres service? → A: Yes, add dependency on postgres service from docker-compose-db.yml.
+- Q: Address frontend connectivity errors (ERR_EMPTY_RESPONSE/CONNECTION_RESET)? → A: Yes, fix the backend startup and port conflicts causing these errors.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -66,6 +69,8 @@ As a developer, I want to remove legacy dependencies (Celery, Flower, Redis) and
 - **FR-008**: System MUST implement structured logging in backend workers and ensure RabbitMQ Management plugin is enabled for task visibility.
 - **FR-009**: System MUST configure TaskIQ with a global or per-task retry policy (e.g., SimpleRetryMiddleware) for 3 attempts with exponential backoff.
 - **FR-010**: System MUST implement the TaskIQ Scheduler component to handle the periodic log cleanup task (daily at midnight).
+- **FR-011**: System MUST ensure backend and worker services depend on the `postgres` service (from `docker-compose-db.yml`).
+- **FR-012**: System MUST resolve the port conflict on 8002 and ensure the frontend can successfully reach the backend API.
 
 ### Key Entities *(include if feature involves data)*
 
