@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+*.log
+.env*
+coverage/
+.git/
+Dockerfile*
+.dockerignore
+backend/__pycache__/
+backend/*.pyc
+backend/venv/
+backend/.venv/
+backend/.pytest_cache/
