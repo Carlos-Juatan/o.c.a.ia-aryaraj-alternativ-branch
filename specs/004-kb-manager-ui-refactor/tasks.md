@@ -21,7 +21,7 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 **Purpose**: Component state preparation
 
-- [ ] T001 Initialize React states `isAddDocsModalOpen` and `isAddNewModalOpen` in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T001 Initialize React states `isAddDocsModalOpen` and `isAddNewModalOpen` in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 ---
 
@@ -29,7 +29,7 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 **Purpose**: Core UI containers that block user story implementation
 
-- [ ] T002 Implement a reusable `BaseModal` helper or standard modal structure using `createPortal` in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T002 Implement a reusable `BaseModal` helper or standard modal structure using `createPortal` in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 ---
 
@@ -41,10 +41,10 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Create the `AddDocumentsModal` UI structure in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T004 [US1] Move buttons "Colar Texto", "Importar CSV / Excel" and "Upload PDF/DOCX" from the main bar to the new modal in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T005 [US1] Implement logic to close `AddDocumentsModal` and trigger existing `isTextModalOpen` for "Colar Texto" in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T006 [US1] Map the "Upload PDF/DOCX" modal button to trigger `fileInputRef.current.click()` in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T003 [US1] Create the `AddDocumentsModal` UI structure in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T004 [US1] Move buttons "Colar Texto", "Importar CSV / Excel" and "Upload PDF/DOCX" from the main bar to the new modal in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T005 [US1] Implement logic to close `AddDocumentsModal` and trigger existing `isTextModalOpen` for "Colar Texto" in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T006 [US1] Map the "Upload PDF/DOCX" modal button to trigger `fileInputRef.current.click()` in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 **Checkpoint**: User Story 1 should be fully functional independently.
 
@@ -58,9 +58,9 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 ### Implementation for User Story 2
 
-- [ ] T007 [US2] Create the `AddNewEntryModal` UI structure wrapping the existing `kb-add-card` logic in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T008 [US2] Ensure `newPair` state binding is preserved within the modal to allow persistence on close in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T009 [US2] Update `handleAddItem` to close the `AddNewEntryModal` upon successful addition in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T007 [US2] Create the `AddNewEntryModal` UI structure wrapping the existing `kb-add-card` logic in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T008 [US2] Ensure `newPair` state binding is preserved within the modal to allow persistence on close in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T009 [US2] Update `handleAddItem` to close the `AddNewEntryModal` upon successful addition in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 **Checkpoint**: User Story 2 should be functional independently.
 
@@ -74,8 +74,8 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Update main `kb-quick-actions` div to show only the 4 specified buttons in `frontend/src/components/KnowledgeBaseManager.jsx`
-- [ ] T011 [US3] Remove the previous inline `kb-add-card` section from the main component rendering in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T010 [US3] Update main `kb-quick-actions` div to show only the 4 specified buttons in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T011 [US3] Remove the previous inline `kb-add-card` section from the main component rendering in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 **Checkpoint**: Component UI refactor complete.
 
@@ -85,8 +85,8 @@ description: "Task list for Knowledge Base Manager UI refactor"
 
 **Purpose**: Final validation
 
-- [ ] T012 Run validation against `specs/004-kb-manager-ui-refactor/quickstart.md`
-- [ ] T013 [P] Update local documentation or comments regarding the new modal structure in `frontend/src/components/KnowledgeBaseManager.jsx`
+- [X] T012 Run validation against `specs/004-kb-manager-ui-refactor/quickstart.md`
+- [X] T013 [P] Update local documentation or comments regarding the new modal structure in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 ---
 
