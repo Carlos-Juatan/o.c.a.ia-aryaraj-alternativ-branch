@@ -802,6 +802,13 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
                         onChange={handleTextMediaTranscribe}
                         accept=".txt"
                     />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                        accept=".pdf,.docx,.doc"
+                    />
                 </div>
 
 
