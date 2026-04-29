@@ -28,9 +28,9 @@ tests/
 : Follow standard conventions
 
 ## Recent Changes
+- 005-modal-navigation-edit: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 005-modal-navigation-edit: Added React 19 (Frontend), Python 3.11/FastAPI (Backend) + `styled-components`, `lucide-react` (icons), `FastAPI`, `SQLAlchemy`
 - 004-kb-manager-ui-refactor: Added JavaScript / JSX (React) + React, ReactDOM (Portal), Existing API Client
-- 004-kb-manager-ui-refactor: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -11,6 +11,9 @@
 - Q: O que acontece se um usuário clicar em uma seta de navegação enquanto estiver no modo 'Editar' com alterações não salvas? → A: Bloquear/Desativar as setas de navegação enquanto o modo de edição estiver ativo.
 - Q: O modal deve suportar teclas de seta (Esquerda/Direita) do teclado para navegação? → A: Sim, suportar as teclas de seta para navegação.
 - Q: Quais campos devem ser editáveis e os metadados devem ser visíveis? → A: Todos os campos visíveis devem ser editáveis, os metadados devem ser adicionados à visualização e também devem ser editáveis.
+- Q: Como alternar entre visualização de lista e JSON para metadados? → A: No modo de leitura, exibir como lista simples por padrão com um botão 'Toggle' para alternar para o formato JSON.
+- Q: Como os metadados devem ser editados? → A: Como uma lista de campos duplos [Chave] : [Valor], permitindo editar os nomes das variáveis (chaves) e adicionar/remover novos pares.
+- Q: Qual o estilo dos botões de navegação? → A: Botões grandes fixos nas laterais do modal (estilo galeria) com fundo semi-transparente.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -30,18 +33,19 @@ As a user, I want to navigate between database items within the visualization mo
 
 ---
 
-### User Story 2 - Content Editing (Priority: P1)
+### User Story 2 - Content & Metadata Editing (Priority: P1)
 
-As a user, I want to edit the content and metadata of a database item directly within the modal so I can correct or update information easily.
+As a user, I want to edit the content and metadata (including keys/names) of a database item directly within the modal so I can correct or update information and manage custom variables.
 
-**Why this priority**: Direct editing within the visualization context is highly efficient and matches user expectations for administrative or data management interfaces.
+**Why this priority**: Direct editing within the visualization context is highly efficient. Managing metadata keys is critical for data organization.
 
-**Independent Test**: Click the "Edit" button in the modal. Verify that all fields (including metadata) become editable inputs. Modify some text and verify the changes are reflected in the UI.
+**Independent Test**: Click "Edit". In the metadata section, change a variable name, add a new row with a new key/value, and delete an existing row. Verify the UI reflects these dynamic changes.
 
 **Acceptance Scenarios**:
 
-1. **Given** the visualization modal is open, **When** the user clicks the "Edit" button, **Then** the display fields (including metadata) transition into editable input fields.
-2. **Given** the modal is in edit mode, **When** the user modifies the content, **Then** the UI reflects the pending changes.
+1. **Given** the modal is in edit mode, **When** the user modifies a metadata key, **Then** the key field accepts the new text.
+2. **Given** the modal is in edit mode, **When** the user clicks "Add Metadata", **Then** a new blank row of [Key] : [Value] appears.
+3. **Given** the modal is in edit mode, **When** the user clicks the "Remove" button on a metadata row, **Then** that row is removed from the pending state.
 
 ---
 
@@ -71,19 +75,20 @@ As a user, I want to save my edits to the database using an "Update" button so t
 
 ### Functional Requirements
 
-- **FR-001**: Modal MUST display left and right navigation arrows when multiple items are available in the current context.
-- **FR-002**: Left arrow MUST navigate to the previous item in the current sequence.
-- **FR-003**: Right arrow MUST navigate to the next item in the current sequence.
+- **FR-001**: Modal MUST display large navigation arrows fixed at the left and right edges (gallery style).
+- **FR-002**: Left arrow MUST navigate to the previous item; Right arrow MUST navigate to the next item.
+- **FR-003**: Navigation buttons MUST use a semi-transparent background for high visibility over modal content.
 - **FR-004**: System MUST support keyboard arrow keys (Left/Right) for navigation when not in Edit mode.
 - **FR-005**: Navigation controls (buttons and keyboard) MUST be disabled when the modal is in Edit mode.
-- **FR-006**: Navigation controls MUST be disabled/hidden when at the boundaries of the list (first/last item).
-- **FR-007**: Modal MUST display all item fields, including metadata.
-- **FR-008**: System MUST provide an "Edit" button to toggle all visible fields between "view" and "edit" states.
-- **FR-009**: System MUST provide an "Update" button (visible only in edit mode) to persist changes.
-- **FR-010**: System MUST provide a "Cancel" button to revert changes and return to view mode.
-- **FR-011**: System MUST send an update request to the database/API upon clicking "Update".
-- **FR-012**: System MUST show a success notification after a successful database update.
-- **FR-013**: System MUST show an error notification if the update fails.
+- **FR-006**: Navigation controls MUST be hidden when at list boundaries (first/last item).
+- **FR-007**: Metadata section MUST support a toggle between "List View" (default) and "JSON View" in read mode.
+- **FR-008**: In Edit mode, metadata MUST be rendered as a list of [Key] and [Value] input fields.
+- **FR-009**: System MUST allow editing of both metadata keys (variable names) and their values.
+- **FR-010**: System MUST provide an "Add Field" button in the metadata edit section.
+- **FR-011**: System MUST provide a "Remove" button for each metadata row in Edit mode.
+- **FR-012**: System MUST provide an "Edit" button to toggle the entire modal state.
+- **FR-013**: System MUST provide an "Update" button to persist all changes (content and metadata).
+- **FR-014**: System MUST provide a "Cancel" button to revert all pending changes.
 
 ### Key Entities *(include if feature involves data)*
 

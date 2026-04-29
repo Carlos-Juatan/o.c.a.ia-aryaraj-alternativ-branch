@@ -1,15 +1,31 @@
-# Data Model: Modal Navigation and Editing
+# Data Model: Metadata & Navigation State
 
-## Changes
-- **No changes required** to the existing `KnowledgeItemModel`.
-- The existing `metadata_val` field will be used for metadata editing.
-- The existing `PUT /knowledge-items/{item_id}` endpoint already supports all required fields.
+## Entities
 
-## Reference: KnowledgeItemModel
-| Field | Type | Description |
+### Metadata Row (Frontend State Only)
+Represents a single editable row in the metadata editor.
+- `key`: string (The name of the variable)
+- `value`: string (The value of the variable)
+
+### Knowledge Item (API Payload)
+The data structure sent to the backend.
+- `id`: UUID
+- `question`: string
+- `answer`: string
+- `metadata`: Object (Map of keys to values)
+
+## State Transitions
+
+| Current State | Action | Next State |
 |---|---|---|
-| id | Integer | Primary Key |
-| question | Text | Question or title |
-| answer | Text | Answer or content |
-| metadata_val | Text | Metadata string |
-| category | String | Item category |
+| Viewing (List) | Click "JSON Toggle" | Viewing (JSON) |
+| Viewing (JSON) | Click "JSON Toggle" | Viewing (List) |
+| Viewing | Click "Edit" | Editing |
+| Editing | Click "Add Field" | Editing (with new empty row) |
+| Editing | Click "Remove" | Editing (with row removed) |
+| Editing | Click "Update" | Viewing (Updated Data) |
+| Editing | Click "Cancel" | Viewing (Original Data) |
+
+## Validations
+1. **Unique Keys**: Before saving, duplicate keys in the metadata array must be merged or flagged.
+2. **JSON Syntax**: If editing in a raw JSON field (if implemented), must validate before saving.
