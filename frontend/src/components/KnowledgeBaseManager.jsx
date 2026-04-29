@@ -107,6 +107,8 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
     const [maximizedForm, setMaximizedForm] = useState(null);
     const [isSavingMaximized, setIsSavingMaximized] = useState(false);
     const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+    const [showJsonView, setShowJsonView] = useState(false);
+    const [metadataEditorItems, setMetadataEditorItems] = useState([]);
 
     const [isBulkSummarizeOpen, setIsBulkSummarizeOpen] = useState(false);
     const [bulkSummarizeForm, setBulkSummarizeForm] = useState({
@@ -220,12 +222,25 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
         if (!maximizedForm || !maximizedItem) return;
         setIsSavingMaximized(true);
         try {
-            const response = await api.put(`/knowledge-items/${maximizedItem.id}`, maximizedForm);
+            // Normalização dos metadados: converte o array do editor em um objeto JSON
+            const metadataObj = {};
+            metadataEditorItems.forEach(item => {
+                if (item.key.trim()) {
+                    metadataObj[item.key.trim()] = item.value;
+                }
+            });
+
+            const finalPayload = {
+                ...maximizedForm,
+                metadata_val: JSON.stringify(metadataObj)
+            };
+
+            const response = await api.put(`/knowledge-items/${maximizedItem.id}`, finalPayload);
             if (response) {
                 if (onUpdate) {
-                    await onUpdate(maximizedItem.id, maximizedForm);
+                    await onUpdate(maximizedItem.id, finalPayload);
                 }
-                setMaximizedItem({ ...maximizedForm, id: maximizedItem.id });
+                setMaximizedItem({ ...finalPayload, id: maximizedItem.id });
                 setIsEditingMaximized(false);
                 setMaximizedForm(null);
                 setShowSuccessModal(true);
@@ -1360,29 +1375,39 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
                                 disabled={filteredItems.findIndex(i => i.id === maximizedItem.id) === 0}
                                 style={{
                                     position: 'absolute', left: '2rem', top: '50%', transform: 'translateY(-50%)',
-                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: 'white', width: '48px', height: '48px', borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                                    color: 'white', width: '64px', height: '64px', borderRadius: '50%',
                                     cursor: filteredItems.findIndex(i => i.id === maximizedItem.id) === 0 ? 'not-allowed' : 'pointer',
-                                    fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 20001, transition: 'all 0.2s', opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === 0 ? 0.3 : 1
+                                    fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    zIndex: 20001, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === 0 ? 0.1 : 0.8,
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                                    backdropFilter: 'blur(4px)'
                                 }}
-                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== 0) e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                            >←</button>
+                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== 0) { e.currentTarget.style.background = 'rgba(99,102,241,0.4)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; e.currentTarget.style.opacity = '1'; } }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; e.currentTarget.style.opacity = '0.8'; }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            </button>
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleNextItem(); }}
                                 disabled={filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1}
                                 style={{
                                     position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)',
-                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: 'white', width: '48px', height: '48px', borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                                    color: 'white', width: '64px', height: '64px', borderRadius: '50%',
                                     cursor: filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1 ? 'not-allowed' : 'pointer',
-                                    fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 20001, transition: 'all 0.2s', opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1 ? 0.3 : 1
+                                    fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    zIndex: 20001, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1 ? 0.1 : 0.8,
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                                    backdropFilter: 'blur(4px)'
                                 }}
-                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== filteredItems.length - 1) e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                            >→</button>
+                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== filteredItems.length - 1) { e.currentTarget.style.background = 'rgba(99,102,241,0.4)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; e.currentTarget.style.opacity = '1'; } }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; e.currentTarget.style.opacity = '0.8'; }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
                         </>
                     )}
 
@@ -1433,17 +1458,97 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
                         <div style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             {/* Metadata */}
                             <div>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>🏷️ {kbLabels.metadata}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '1.5px' }}>🏷️ {kbLabels.metadata}</div>
+                                    {!isEditingMaximized && (
+                                        <button 
+                                            onClick={() => setShowJsonView(!showJsonView)}
+                                            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', borderRadius: '6px', padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        >
+                                            {showJsonView ? (
+                                                <><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> Ver Lista</>
+                                            ) : (
+                                                <><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Ver JSON</>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                                
                                 {isEditingMaximized ? (
-                                    <textarea
-                                        value={maximizedForm.metadata_val || ''}
-                                        onChange={e => setMaximizedForm({ ...maximizedForm, metadata_val: e.target.value })}
-                                        placeholder="Digite os metadados aqui..."
-                                        style={{ width: '100%', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '1rem 1.5rem', color: '#e2e8f0', fontSize: '0.95rem', fontWeight: 600, minHeight: '80px', outline: 'none', resize: 'vertical', transition: 'all 0.2s' }}
-                                    />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '12px', padding: '12px' }}>
+                                        {metadataEditorItems.map((item, idx) => (
+                                            <div key={item.id} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <input
+                                                    value={item.key}
+                                                    placeholder="Nome"
+                                                    onChange={e => {
+                                                        const newItems = [...metadataEditorItems];
+                                                        newItems[idx].key = e.target.value;
+                                                        setMetadataEditorItems(newItems);
+                                                    }}
+                                                    style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '6px', padding: '6px 10px', color: 'white', fontSize: '0.85rem', outline: 'none' }}
+                                                />
+                                                <span style={{ color: '#f59e0b', fontWeight: 900 }}>:</span>
+                                                <input
+                                                    value={item.value}
+                                                    placeholder="Valor"
+                                                    onChange={e => {
+                                                        const newItems = [...metadataEditorItems];
+                                                        newItems[idx].value = e.target.value;
+                                                        setMetadataEditorItems(newItems);
+                                                    }}
+                                                    style={{ flex: 2, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '6px', padding: '6px 10px', color: '#cbd5e1', fontSize: '0.85rem', outline: 'none' }}
+                                                />
+                                                <button
+                                                    onClick={() => setMetadataEditorItems(metadataEditorItems.filter((_, i) => i !== idx))}
+                                                    style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', width: '28px', height: '28px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            onClick={() => setMetadataEditorItems([...metadataEditorItems, { id: Math.random().toString(36).substr(2, 9), key: '', value: '' }])}
+                                            style={{ marginTop: '4px', background: 'rgba(99,102,241,0.1)', border: '1px dashed rgba(99,102,241,0.3)', color: '#a5b4fc', borderRadius: '6px', padding: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Variável
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '1rem 1.5rem', color: '#e2e8f0', fontSize: '0.95rem', fontWeight: 600 }}>
-                                        {maximizedItem.metadata_val || maximizedItem.metadata || 'Nenhum metadado'}
+                                        {showJsonView ? (
+                                            <pre style={{ margin: 0, fontSize: '0.8rem', fontFamily: 'monospace', color: '#fbbf24', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+                                                {(() => {
+                                                    const raw = maximizedItem.metadata_val || maximizedItem.metadata || '{}';
+                                                    try {
+                                                        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                                                        return JSON.stringify(parsed, null, 2);
+                                                    } catch (e) {
+                                                        return String(raw);
+                                                    }
+                                                })()}
+                                            </pre>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                {(() => {
+                                                    const raw = maximizedItem.metadata_val || maximizedItem.metadata || '';
+                                                    try {
+                                                        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                                                        if (parsed && typeof parsed === 'object') {
+                                                            const entries = Object.entries(parsed);
+                                                            if (entries.length === 0) return 'Nenhum metadado';
+                                                            return entries.map(([k, v]) => (
+                                                                <div key={k} style={{ display: 'flex', gap: '8px' }}>
+                                                                    <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>{k}:</span>
+                                                                    <span style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                                                                </div>
+                                                            ));
+                                                        }
+                                                    } catch (e) {}
+                                                    return raw || 'Nenhum metadado';
+                                                })()}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1512,11 +1617,35 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
                                     <>
                                         <button
                                             onClick={() => {
+                                                const rawMetadata = maximizedItem.metadata_val || maximizedItem.metadata || '';
+                                                let parsedMetadata = [];
+                                                
+                                                try {
+                                                    const metaObj = typeof rawMetadata === 'string' ? JSON.parse(rawMetadata) : rawMetadata;
+                                                    if (metaObj && typeof metaObj === 'object') {
+                                                        parsedMetadata = Object.entries(metaObj).map(([key, value]) => ({
+                                                            id: Math.random().toString(36).substr(2, 9),
+                                                            key,
+                                                            value: typeof value === 'object' ? JSON.stringify(value) : String(value)
+                                                        }));
+                                                    }
+                                                } catch (e) {
+                                                    // Se não for JSON, trata como string simples se houver conteúdo
+                                                    if (rawMetadata) {
+                                                        parsedMetadata = [{ id: 'default', key: 'info', value: String(rawMetadata) }];
+                                                    }
+                                                }
+
+                                                if (parsedMetadata.length === 0) {
+                                                    parsedMetadata = [{ id: Math.random().toString(36).substr(2, 9), key: '', value: '' }];
+                                                }
+
+                                                setMetadataEditorItems(parsedMetadata);
                                                 setMaximizedForm({
                                                     question: maximizedItem.question,
                                                     answer: maximizedItem.answer,
                                                     category: maximizedItem.category || 'Geral',
-                                                    metadata_val: maximizedItem.metadata_val || maximizedItem.metadata || ''
+                                                    metadata_val: rawMetadata
                                                 });
                                                 setIsEditingMaximized(true);
                                             }}
