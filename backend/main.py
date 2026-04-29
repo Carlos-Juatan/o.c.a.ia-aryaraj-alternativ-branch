@@ -21,6 +21,7 @@ from smart_importer import extract_text_from_pdf, chunk_text, generate_qa_from_t
 import logging
 import asyncio
 from router_import import router as import_router
+from broker import broker
 from transcription_service import transcribe_video
 from services.s3_service import s3_service
 import tempfile
@@ -114,7 +115,11 @@ async def verify_api_key(api_key: str = Security(_API_KEY_HEADER)):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    if not broker.is_worker_process:
+        await broker.startup()
     yield
+    if not broker.is_worker_process:
+        await broker.shutdown()
 
 app = FastAPI(title="AI Agent API", lifespan=lifespan)
 app.state.limiter = limiter
@@ -1512,8 +1517,9 @@ async def process_json_batch_endpoint(
         }
         
     except Exception as e:
-        logger.error(f"Erro ao iniciar processamento de lote JSON: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        logger.error(f"Erro ao iniciar processamento de lote JSON: {repr(e)}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(repr(e)))
 
 @app.post("/knowledge-bases/{kb_id}/import-mapped", dependencies=[Depends(verify_api_key)])
 async def import_mapped_file(

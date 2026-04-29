@@ -1,2 +1,0 @@
-
-LEMBRE DE REMOVER O **scheduler** do docker-compose-local.yml
