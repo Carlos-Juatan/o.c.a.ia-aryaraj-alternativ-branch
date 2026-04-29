@@ -101,6 +101,11 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
         useMetadata: false,
         useCategory: false
     });
+
+    // Estados para Edição e Navegação no Modal Maximizado
+    const [isEditingMaximized, setIsEditingMaximized] = useState(false);
+    const [maximizedForm, setMaximizedForm] = useState(null);
+    const [isSavingMaximized, setIsSavingMaximized] = useState(false);
     const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
     const [isBulkSummarizeOpen, setIsBulkSummarizeOpen] = useState(false);
@@ -168,6 +173,71 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
         }
     };
 
+    // Data processing and Filtering
+    const safeKb = Array.isArray(knowledgeBase) ? knowledgeBase : [];
+    const filteredItems = safeKb
+        .map((item, index) => (item ? { ...item, originalIndex: index } : null))
+        .filter(item => !!item)
+        .filter(item => {
+            if (!kbFilterTerm.trim()) return true;
+            const t = kbFilterTerm.toLowerCase();
+            return (
+                (item?.question || '').toLowerCase().includes(t) ||
+                (item?.answer || '').toLowerCase().includes(t) ||
+                (item?.category || '').toLowerCase().includes(t) ||
+                (item?.metadata_val || '').toLowerCase().includes(t)
+            );
+        });
+
+    const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+    const paginatedItems = filteredItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    const hasItems = filteredItems.length > 0;
+
+    // Navigation and Update Handlers for Maximized Modal
+    const handlePrevItem = () => {
+        if (!maximizedItem) return;
+        const currentIndex = filteredItems.findIndex(i => i.id === maximizedItem.id);
+        if (currentIndex > 0) {
+            const prevItem = filteredItems[currentIndex - 1];
+            setMaximizedItem({ ...prevItem });
+            setIsEditingMaximized(false);
+            setMaximizedForm(null);
+        }
+    };
+
+    const handleNextItem = () => {
+        if (!maximizedItem) return;
+        const currentIndex = filteredItems.findIndex(i => i.id === maximizedItem.id);
+        if (currentIndex < filteredItems.length - 1) {
+            const nextItem = filteredItems[currentIndex + 1];
+            setMaximizedItem({ ...nextItem });
+            setIsEditingMaximized(false);
+            setMaximizedForm(null);
+        }
+    };
+
+    const handleUpdateMaximized = async () => {
+        if (!maximizedForm || !maximizedItem) return;
+        setIsSavingMaximized(true);
+        try {
+            const response = await api.put(`/knowledge-items/${maximizedItem.id}`, maximizedForm);
+            if (response) {
+                if (onUpdate) {
+                    await onUpdate(maximizedItem.id, maximizedForm);
+                }
+                setMaximizedItem({ ...maximizedForm, id: maximizedItem.id });
+                setIsEditingMaximized(false);
+                setMaximizedForm(null);
+                setShowSuccessModal(true);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar item:', error);
+            alert('Falha ao atualizar o item. Por favor, tente novamente.');
+        } finally {
+            setIsSavingMaximized(false);
+        }
+    };
+
     useEffect(() => {
         const fetchKbData = async () => {
             if (!kbId) return;
@@ -189,13 +259,32 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
     }, [kbId]);
 
     useEffect(() => {
-        if (sourceView || duplicateGroups || showMaximizedTranscription || isTranscribing || isCreatingRag || showTranscriptionPopup || showRagConfigPopup || showSuccessModal || isBulkEditOpen || isBulkSummarizeOpen || isTextOptionsOpen) {
+        if (maximizedItem || sourceView || duplicateGroups || showMaximizedTranscription || isTranscribing || isCreatingRag || showTranscriptionPopup || showRagConfigPopup || showSuccessModal || isBulkEditOpen || isBulkSummarizeOpen || isTextOptionsOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
         }
         return () => { document.body.style.overflow = ''; };
-    }, [sourceView, duplicateGroups, showMaximizedTranscription, isTranscribing, isCreatingRag, showTranscriptionPopup, showRagConfigPopup, showSuccessModal, isBulkEditOpen, isBulkSummarizeOpen, isTextOptionsOpen]);
+    }, [maximizedItem, sourceView, duplicateGroups, showMaximizedTranscription, isTranscribing, isCreatingRag, showTranscriptionPopup, showRagConfigPopup, showSuccessModal, isBulkEditOpen, isBulkSummarizeOpen, isTextOptionsOpen]);
+
+    // Listener para navegação via teclado no modal maximizado
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!maximizedItem || isEditingMaximized) return;
+
+            if (e.key === 'ArrowLeft') {
+                handlePrevItem();
+            } else if (e.key === 'ArrowRight') {
+                handleNextItem();
+            } else if (e.key === 'Escape') {
+                setMaximizedItem(null);
+                setIsEditingMaximized(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [maximizedItem, isEditingMaximized, filteredItems]);
 
     const toggleSelect = (id) => {
         const newSelected = new Set(selectedItems);
@@ -625,24 +714,6 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
         setShowImporter(true);
     };
 
-    const safeKb = Array.isArray(knowledgeBase) ? knowledgeBase : [];
-    const filteredItems = safeKb
-        .map((item, index) => (item ? { ...item, originalIndex: index } : null))
-        .filter(item => !!item)
-        .filter(item => {
-            if (!kbFilterTerm.trim()) return true;
-            const t = kbFilterTerm.toLowerCase();
-            return (
-                (item?.question || '').toLowerCase().includes(t) ||
-                (item?.answer || '').toLowerCase().includes(t) ||
-                (item?.category || '').toLowerCase().includes(t) ||
-                (item?.metadata_val || '').toLowerCase().includes(t)
-            );
-        });
-
-    const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-    const paginatedItems = filteredItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-    const hasItems = filteredItems.length > 0;
 
     const handleCreateRag = async () => {
         if (!selectedVideoFile) return;
@@ -1274,13 +1345,47 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
 
             {maximizedItem && document.body && createPortal(
                 <div
-                    onClick={() => setMaximizedItem(null)}
+                    onClick={() => { if (!isEditingMaximized) setMaximizedItem(null); }}
                     style={{
                         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
                         zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center',
                         padding: '2rem', animation: 'fadeIn 0.2s ease'
                     }}
                 >
+                    {/* Navigation Arrows */}
+                    {!isEditingMaximized && (
+                        <>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handlePrevItem(); }}
+                                disabled={filteredItems.findIndex(i => i.id === maximizedItem.id) === 0}
+                                style={{
+                                    position: 'absolute', left: '2rem', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                    color: 'white', width: '48px', height: '48px', borderRadius: '50%',
+                                    cursor: filteredItems.findIndex(i => i.id === maximizedItem.id) === 0 ? 'not-allowed' : 'pointer',
+                                    fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    zIndex: 20001, transition: 'all 0.2s', opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === 0 ? 0.3 : 1
+                                }}
+                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== 0) e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                            >←</button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleNextItem(); }}
+                                disabled={filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1}
+                                style={{
+                                    position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                    color: 'white', width: '48px', height: '48px', borderRadius: '50%',
+                                    cursor: filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    zIndex: 20001, transition: 'all 0.2s', opacity: filteredItems.findIndex(i => i.id === maximizedItem.id) === filteredItems.length - 1 ? 0.3 : 1
+                                }}
+                                onMouseEnter={e => { if (filteredItems.findIndex(i => i.id === maximizedItem.id) !== filteredItems.length - 1) e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                            >→</button>
+                        </>
+                    )}
+
                     <div
                         onClick={e => e.stopPropagation()}
                         style={{
@@ -1302,57 +1407,128 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '8px', height: '32px', background: 'linear-gradient(to bottom, #6366f1, #a855f7)', borderRadius: '4px' }} />
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>CONTEÚDO COMPLETO</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 600, marginTop: '2px' }}>ID: {maximizedItem.id} &nbsp;·&nbsp; {maximizedItem.category || 'Geral'}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        {isEditingMaximized ? 'EDIÇÃO DE CONTEÚDO' : `CONTEÚDO COMPLETO (${filteredItems.findIndex(i => i.id === maximizedItem.id) + 1} de ${filteredItems.length})`}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 600, marginTop: '2px' }}>ID: {maximizedItem.id} &nbsp;·&nbsp; {isEditingMaximized ? (
+                                    <input
+                                            value={maximizedForm.category}
+                                            onChange={e => setMaximizedForm({ ...maximizedForm, category: e.target.value })}
+                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '2px 8px', color: 'white', fontSize: '0.8rem', outline: 'none', transition: 'all 0.2s' }}
+                                        />
+                                    ) : (maximizedItem.category || 'Geral')}</div>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setMaximizedItem(null)}
-                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
-                            >✕</button>
+                            {!isEditingMaximized && (
+                                <button
+                                    onClick={() => setMaximizedItem(null)}
+                                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
+                                >✕</button>
+                            )}
                         </div>
 
                         {/* Content */}
                         <div style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             {/* Metadata */}
-                            {maximizedItem.metadata && (
-                                <div>
-                                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>🏷️ {kbLabels.metadata}</div>
+                            <div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>🏷️ {kbLabels.metadata}</div>
+                                {isEditingMaximized ? (
+                                    <textarea
+                                        value={maximizedForm.metadata_val || ''}
+                                        onChange={e => setMaximizedForm({ ...maximizedForm, metadata_val: e.target.value })}
+                                        placeholder="Digite os metadados aqui..."
+                                        style={{ width: '100%', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '1rem 1.5rem', color: '#e2e8f0', fontSize: '0.95rem', fontWeight: 600, minHeight: '80px', outline: 'none', resize: 'vertical', transition: 'all 0.2s' }}
+                                    />
+                                ) : (
                                     <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '1rem 1.5rem', color: '#e2e8f0', fontSize: '0.95rem', fontWeight: 600 }}>
-                                        {maximizedItem.metadata}
+                                        {maximizedItem.metadata_val || maximizedItem.metadata || 'Nenhum metadado'}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                             {/* Question */}
                             <div>
                                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>❓ {kbLabels.question}</div>
-                                <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#e2e8f0', fontSize: '1rem', fontWeight: 600, lineHeight: 1.6 }}>
-                                    {maximizedItem.question}
-                                </div>
+                                {isEditingMaximized ? (
+                                    <textarea
+                                        value={maximizedForm.question}
+                                        onChange={e => setMaximizedForm({ ...maximizedForm, question: e.target.value })}
+                                        style={{ width: '100%', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#e2e8f0', fontSize: '1rem', fontWeight: 600, lineHeight: 1.6, minHeight: '100px', outline: 'none', resize: 'vertical', transition: 'all 0.2s' }}
+                                    />
+                                ) : (
+                                    <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#e2e8f0', fontSize: '1rem', fontWeight: 600, lineHeight: 1.6 }}>
+                                        {maximizedItem.question}
+                                    </div>
+                                )}
                             </div>
                             {/* Answer */}
                             <div>
                                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>💬 {kbLabels.answer}</div>
-                                <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-                                    {maximizedItem.answer}
-                                </div>
+                                {isEditingMaximized ? (
+                                    <textarea
+                                        value={maximizedForm.answer}
+                                        onChange={e => setMaximizedForm({ ...maximizedForm, answer: e.target.value })}
+                                        style={{ width: '100%', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.8, minHeight: '200px', outline: 'none', resize: 'vertical', transition: 'all 0.2s' }}
+                                    />
+                                ) : (
+                                    <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '12px', padding: '1.25rem 1.5rem', color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                                        {maximizedItem.answer}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Footer */}
                         <div style={{ padding: '1rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                <span style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '4px 12px', fontSize: '0.75rem', color: '#a5b4fc', fontWeight: 700 }}>{maximizedItem.category || 'Geral'}</span>
-                                <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '4px 12px', fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>
-                                    📏 {(maximizedItem.question?.length || 0) + (maximizedItem.answer?.length || 0) + (maximizedItem.metadata?.length || 0)} chars · 🪙 ~{Math.ceil(((maximizedItem.question?.length || 0) + (maximizedItem.answer?.length || 0) + (maximizedItem.metadata?.length || 0)) / 4)} tokens
-                                </span>
+                                {isEditingMaximized ? (
+                                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'flex', alignItems: 'center' }}>Modo de Edição Ativo</span>
+                                ) : (
+                                    <>
+                                        <span style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '4px 12px', fontSize: '0.75rem', color: '#a5b4fc', fontWeight: 700 }}>{maximizedItem.category || 'Geral'}</span>
+                                        <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '4px 12px', fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>
+                                            📏 {(maximizedItem.question?.length || 0) + (maximizedItem.answer?.length || 0) + (maximizedItem.metadata_val?.length || 0) + (maximizedItem.metadata?.length || 0)} chars
+                                        </span>
+                                    </>
+                                )}
                             </div>
-                            <button
-                                onClick={() => setMaximizedItem(null)}
-                                style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc', borderRadius: '10px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
-                            >Fechar</button>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {isEditingMaximized ? (
+                                    <>
+                                        <button
+                                            onClick={() => { setIsEditingMaximized(false); setMaximizedForm(null); }}
+                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', borderRadius: '10px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                                        >Cancelar</button>
+                                        <button
+                                            onClick={handleUpdateMaximized}
+                                            disabled={isSavingMaximized}
+                                            style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', border: 'none', color: 'white', borderRadius: '10px', padding: '8px 24px', fontSize: '0.85rem', fontWeight: 700, cursor: isSavingMaximized ? 'not-allowed' : 'pointer', opacity: isSavingMaximized ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
+                                        >
+                                            {isSavingMaximized ? 'Salvando...' : 'Atualizar'}
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => {
+                                                setMaximizedForm({
+                                                    question: maximizedItem.question,
+                                                    answer: maximizedItem.answer,
+                                                    category: maximizedItem.category || 'Geral',
+                                                    metadata_val: maximizedItem.metadata_val || maximizedItem.metadata || ''
+                                                });
+                                                setIsEditingMaximized(true);
+                                            }}
+                                            style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc', borderRadius: '10px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                                        >Editar</button>
+                                        <button
+                                            onClick={() => setMaximizedItem(null)}
+                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', borderRadius: '10px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                                        >Fechar</button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>, document.body

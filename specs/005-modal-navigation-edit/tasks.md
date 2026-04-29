@@ -15,7 +15,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Update `KnowledgeBaseManager.jsx` component to include initial state placeholders for maximized view navigation and editing.
+- [x] T001 Update `KnowledgeBaseManager.jsx` component to include initial state placeholders for maximized view navigation and editing.
 
 ---
 
@@ -25,9 +25,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] Add `isEditingMaximized` (boolean) and `maximizedForm` (object) states to `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T003 [P] Implement `handleNextItem` and `handlePrevItem` functions in `frontend/src/components/KnowledgeBaseManager.jsx`. Use `filteredItems.findIndex()` to dynamically determine position and prevent stale indexing.
-- [ ] T004 [P] Implement `handleUpdateMaximized` function to call `api.put("/knowledge-items/{item_id}", ...)` using the `metadata_val` field in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T002 [P] Add `isEditingMaximized` (boolean) and `maximizedForm` (object) states to `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T003 [P] Implement `handleNextItem` and `handlePrevItem` functions in `frontend/src/components/KnowledgeBaseManager.jsx`. Use `filteredItems.findIndex()` to dynamically determine position and prevent stale indexing.
+- [x] T004 [P] Implement `handleUpdateMaximized` function to call `api.put("/knowledge-items/{item_id}", ...)` using the `metadata_val` field in `frontend/src/components/KnowledgeBaseManager.jsx`.
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -41,9 +41,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Add side-positioned navigation arrows (ChevronLeft/Right) to the maximized modal UI in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T006 [US1] Implement `useEffect` for keyboard `keydown` listener to trigger navigation in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T007 [US1] Add logic to disable/hide navigation arrows when at the start or end of the `filteredItems` list in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T005 [US1] Add side-positioned navigation arrows (ChevronLeft/Right) to the maximized modal UI in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T006 [US1] Implement `useEffect` for keyboard `keydown` listener to trigger navigation in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T007 [US1] Add logic to disable/hide navigation arrows when at the start or end of the `filteredItems` list in `frontend/src/components/KnowledgeBaseManager.jsx`.
 
 **Checkpoint**: Item navigation is functional independently of editing.
 
@@ -57,9 +57,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Add "Editar" and "Cancelar" buttons to the maximized modal footer in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T009 [US2] Implement conditional rendering to swap text displays for input/textarea fields (including `metadata_val` as a plain text/JSON editor) when `isEditingMaximized` is true in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T010 [US2] Add logic to disable navigation (arrows and keyboard) while `isEditingMaximized` is true in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T008 [US2] Add "Editar" and "Cancelar" buttons to the maximized modal footer in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T009 [US2] Implement conditional rendering to swap text displays for input/textarea fields (including `metadata_val` as a plain text/JSON editor) when `isEditingMaximized` is true in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T010 [US2] Add logic to disable navigation (arrows and keyboard) while `isEditingMaximized` is true in `frontend/src/components/KnowledgeBaseManager.jsx`.
 
 **Checkpoint**: Edit mode is functional UI-wise, but not yet persistent.
 
@@ -73,9 +73,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T011 [US3] Add "Atualizar" button to the maximized modal footer (visible only in edit mode) in `frontend/src/components/KnowledgeBaseManager.jsx`. Ensure it sends `metadata_val` correctly.
-- [ ] T012 [US3] Connect "Atualizar" button to `handleUpdateMaximized` and ensure it handles loading states in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T013 [US3] Implement success/error toast notifications or inline messages after the update operation in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T011 [US3] Add "Atualizar" button to the maximized modal footer (visible only in edit mode) in `frontend/src/components/KnowledgeBaseManager.jsx`. Ensure it sends `metadata_val` correctly.
+- [x] T012 [US3] Connect "Atualizar" button to `handleUpdateMaximized` and ensure it handles loading states in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T013 [US3] Implement success/error toast notifications or inline messages after the update operation in `frontend/src/components/KnowledgeBaseManager.jsx`.
 
 **Checkpoint**: Full end-to-end functionality (Navigation + Edit + Save).
 
@@ -85,9 +85,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T014 [P] Refine CSS transitions and animations for modal field swaps and navigation in `frontend/src/components/KnowledgeBaseManager.jsx`.
-- [ ] T015 Run `quickstart.md` validation to ensure all scenarios pass.
-- [ ] T016 [P] Perform manual performance benchmarking to verify SC-001 (Navigation < 10s) and SC-002 (Update < 15s) in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T014 [P] Refine CSS transitions and animations for modal field swaps and navigation in `frontend/src/components/KnowledgeBaseManager.jsx`.
+- [x] T015 Run `quickstart.md` validation to ensure all scenarios pass.
+- [x] T016 [P] Perform manual performance benchmarking to verify SC-001 (Navigation < 10s) and SC-002 (Update < 15s) in `frontend/src/components/KnowledgeBaseManager.jsx`.
 
 ---
 
