@@ -16,7 +16,7 @@ The system distinguishes between **Team roles** (Superadmin, Admin) and **Client
 - **Admin:** System maintenance. Can add/remove Client accounts (`USUARIO_ADMIN`, `USUARIO`). Cannot manage Team roles.
 
 **Client Roles (External):**
-- **Usuario Admin:** Power user client. Can add/remove other `USUARIO` accounts. Cannot modify system settings.
+- **Usuario Admin:** Power user client. Can add/remove other `USUARIO_ADMIN` and `USUARIO` accounts. Cannot modify system settings.
 - **Usuario:** Regular client user. No management permissions.
 
 **Why this priority**: Core security and access control mechanism.
@@ -25,7 +25,7 @@ The system distinguishes between **Team roles** (Superadmin, Admin) and **Client
 **Acceptance Scenarios**:
 1. **Given** a Superadmin logged in, **When** viewing the user list, **Then** they can promote an Admin to Superadmin or demote themselves (if another Superadmin exists).
 2. **Given** an Admin logged in, **When** attempting to manage users, **Then** they can add/remove `USUARIO_ADMIN` or `USUARIO` but cannot see or edit `SUPERADMIN` or other `ADMIN` accounts.
-3. **Given** a `USUARIO_ADMIN` logged in, **When** managing users, **Then** they can only add or remove `USUARIO` accounts from their own client context.
+3. **Given** a `USUARIO_ADMIN` logged in, **When** managing users, **Then** they can add or remove `USUARIO_ADMIN` and `USUARIO` accounts from their own client context.
 
 ---
 
@@ -86,11 +86,12 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - **FR-004**: Superadmin MUST be able to grant `SUPERADMIN` status to `ADMIN` users.
 - **FR-005**: Superadmin MUST NOT be able to revoke their own `SUPERADMIN` status unless at least one other `SUPERADMIN` exists in the system.
 - **FR-006**: Admin MUST be able to add/remove Client role accounts (`USUARIO_ADMIN`, `USUARIO`) only.
-- **FR-015**: `USUARIO_ADMIN` MUST be able to add/remove `USUARIO` role accounts only.
+- **FR-015**: `USUARIO_ADMIN` MUST be able to add/remove both `USUARIO_ADMIN` and `USUARIO` role accounts.
 - **FR-007**: Client roles (`USUARIO_ADMIN`, `USUARIO`) MUST be restricted to "Conversation History" (view, delete, start new) and MUST NOT be able to modify core Agent configuration (prompt, model, tools). Team roles (`SUPERADMIN`, `ADMIN`) have full access to modify the Agent.
 - **FR-014**: Team roles and `USUARIO_ADMIN` MUST have the permission to "Activate/Deactivate" the Agent, while `USUARIO` MUST NOT.
-- **FR-009**: Database access for `USUARIO_ADMIN`: View, Edit, and "Add New" (restricted strictly to the "Novo Conhecimento" modal via "✨ Adicionar Novo" button).
-- **FR-010**: Database access for `USUARIO`: View-only (no editing, no adding).
+- **FR-009**: Database access for `USUARIO_ADMIN`: View, Edit, and "Add New".
+- **FR-016**: System MUST hide all bulk import and advanced addition methods (CSV, API, etc.) for Client roles, leaving ONLY the "✨ Adicionar Novo" button visible for `USUARIO_ADMIN`.
+- **FR-010**: Database access for `USUARIO`: View-only (no editing, no adding). All addition/import buttons MUST be hidden.
 - **FR-011**: Inbox access: All roles can view and reply to questions.
 - **FR-012**: Inbox cleanup: Only Team roles (`SUPERADMIN`, `ADMIN`) can delete questions that have not been answered.
 - **FR-013**: User Creation: System MUST generate a unique, single-use registration link valid for 24 hours. Manual user creation forms MUST be removed for all management screens.
@@ -109,6 +110,7 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - **SC-002**: 100% of invitation links automatically invalidate and become unusable after 24 hours.
 - **SC-003**: Client users (`USUARIO_ADMIN`, `USUARIO`) are 100% prevented from accessing the Agent configuration API or UI components for modification.
 - **SC-004**: The system maintains at least one active Superadmin at all times via logic-level validation.
+- **SC-005**: Registration page passes visual excellence check with an animated mesh/dynamic gradient background.
 
 ## Assumptions
 
@@ -125,3 +127,6 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - Q: Can Admin (Team) modify agent configuration? → A: Yes, Team roles (Superadmin and Admin) have full access.
 - Q: Is user management isolated by groups? → A: No, deployment is single-tenant; management is global for the instance.
 - Q: How is the first Superadmin created? → A: Via credentials defined in the .env file.
+- Q: What is the management scope for USUARIO_ADMIN? → A: Can invite both USUARIO_ADMIN and USUARIO.
+- Q: What is the visual style for the registration page? → A: Dynamic background with animated gradients.
+- Q: How to handle Knowledge Base addition buttons for clients? → A: Hide all advanced/bulk methods, only show "Adicionar Novo" for Usuario Admin.

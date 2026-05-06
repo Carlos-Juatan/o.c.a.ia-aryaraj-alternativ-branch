@@ -1,34 +1,35 @@
 # Implementation Plan: Enhanced User Roles, Permissions and Navigation Refactor
 
-**Branch**: `006-user-roles-inbox-refactor` | **Date**: 2026-05-06 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/specs/006-user-roles-inbox-refactor/spec.md`
+**Branch**: `006-user-roles-inbox-refactor` | **Date**: 2026-05-06 | **Spec**: [spec.md](file:///mnt/D_DADOS/02_OPERACIONAL/TRABALHOS_ATIVOS/ALL_WORKS/Aryaraj/API%20-%20FluxAI/Projeto/o.c.a.ia-aryaraj-alternativ-branch/specs/006-user-roles-inbox-refactor/spec.md)
 
 ## Summary
 
-This feature implements a robust four-tier role-based access control (RBAC) system (Superadmin, Admin, Usuario Admin, Usuario) to distinguish between internal maintenance teams and external clients. It also streamlines navigation by moving the "Inbox" (FAQ) to the sidebar and replaces manual user creation with a secure 24-hour invitation link system.
+This feature implements a robust four-tier Role-Based Access Control (RBAC) system (SUPERADMIN, ADMIN, USUARIO_ADMIN, USUARIO), replaces manual user creation with a secure invitation link system (24h expiry), and refactors the sidebar to include a dedicated "Inbox/FAQ" section. It also includes a visual overhaul of the registration page to match the premium "FluxAI" aesthetic.
 
 ## Technical Context
 
-**Language/Version**: Python 3.11 (Backend), Node.js (Frontend)
-**Primary Dependencies**: FastAPI, SQLAlchemy, TaskIQ, RabbitMQ, Vite, React
-**Storage**: PostgreSQL + pgvector
-**Testing**: pytest (Backend), Vitest/Playwright (Frontend)
-**Target Platform**: Linux (Docker/On-premise)
-**Project Type**: Web Service + Single Page Application
-**Performance Goals**: < 200ms API response time, invitation links invalidated within 1 minute of expiry.
-**Constraints**: Single-tenant deployment (on-premise server), rigid role isolation.
-**Scale/Scope**: Support for multiple users within a single organization, management of agent configuration and knowledge base.
+**Language/Version**: Python 3.11, React 18+  
+**Primary Dependencies**: FastAPI, SQLAlchemy (async), Pydantic v2, TaskIQ, Tailwind CSS  
+**Storage**: PostgreSQL (pgvector)  
+**Testing**: pytest  
+**Target Platform**: Linux / Docker  
+**Project Type**: Web Application (Monorepo)  
+**Performance Goals**: <200ms API response for auth/management, seamless background animation on registration.  
+**Constraints**: Single-tenant environment, strict role hierarchy, 24h token validity.  
+**Scale/Scope**: 4 distinct roles, invitation system, sidebar refactor, knowledge base access restrictions.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Rule | Status | Notes |
-|------|--------|-------|
-| Role-Based Access | PASS | Four distinct roles defined with clear isolation. |
-| Auditability | PASS | Plan includes tracking user actions and modifications. |
-| Secret Management | PASS | Initial Superadmin and other keys handled via `.env`. |
-| UX/UI Integrity | PASS | Moving Inbox to sidebar improves visibility; real-time invite validation. |
+| Principle | Status | Rationale |
+|-----------|--------|-----------|
+| I. Canonical Tech Stack | ✅ Pass | Using FastAPI, React, SQLAlchemy, and Tailwind CSS. |
+| II. Service Layer | ✅ Pass | Logic for invitations and user management will reside in service layer. |
+| III. Data Integrity | ✅ Pass | Audit logging will be implemented for all permission changes. |
+| V. Security by Design | ✅ Pass | JWT-based auth, rigid role isolation, and time-limited tokens. |
+| VI. Observability | ✅ Pass | Audit records for all user/invitation mutations. |
+| VIII. UX/UI Integrity | ✅ Pass | Progress indicators for registrations and clear role-based UI visibility. |
 
 ## Project Structure
 
@@ -41,31 +42,36 @@ specs/006-user-roles-inbox-refactor/
 ├── data-model.md        # Phase 1 output
 ├── quickstart.md        # Phase 1 output
 ├── contracts/           # Phase 1 output
-└── tasks.md             # Phase 2 output (not created by plan)
+└── tasks.md             # Phase 2 output (to be generated)
 ```
 
 ### Source Code (repository root)
 
 ```text
 backend/
-├── src/
-│   ├── models/          # Update User and Invitation models
-│   ├── services/        # Update Auth and User management logic
-│   └── api/             # New endpoints for invitations and restricted agent toggle
-└── tests/
+├── main.py              # API Routes and Middleware
+├── models.py            # Database Models
+├── database.py          # Init and Migrations
+├── services/
+│   ├── auth_service.py  # (NEW) Invitation and Auth logic
+│   └── audit_service.py # Existing audit logger
+└── alembic/             # Migrations
 
 frontend/
 ├── src/
-│   ├── components/      # Sidebar and Navigation updates
-│   ├── pages/           # New User Management and Invitation Registration pages
-│   └── services/        # API integration for new roles
-└── tests/
+│   ├── components/
+│   │   ├── Sidebar.jsx       # Navigation refactor
+│   │   ├── UserManagement.jsx# RBAC UI updates
+│   │   ├── Register.jsx     # Visual overhaul
+│   │   └── auth/            # Invitation modals
+│   ├── constants/
+│   │   └── auth.js          # Role definitions
+│   └── api/
+│       └── client.js        # API requests
 ```
 
-**Structure Decision**: Option 2: Web application (backend + frontend).
+**Structure Decision**: Web Application (Monorepo) as per Principle I.
 
 ## Complexity Tracking
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| None | N/A | N/A |
+> **No violations identified.**

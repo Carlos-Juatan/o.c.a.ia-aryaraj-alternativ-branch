@@ -1,40 +1,23 @@
-# Quickstart: User Management and Sidebar Refactor
+# Quickstart: User Roles & Invitation Refactor
 
-## Setup Environment
+## Developer Setup
+1. **Migrations**: Apply the new `invitations` table schema.
+   ```bash
+   cd backend
+   alembic upgrade head
+   ```
+2. **Environment**: Ensure `INITIAL_SUPERADMIN_EMAIL` and `INITIAL_SUPERADMIN_PASSWORD` are set in your `.env`.
+3. **Frontend**: The new registration page is available at `/register?token=<uuid>`.
 
-Ensure the following variables are set in your `.env` file:
+## Feature Testing
+1. Login as Superadmin.
+2. Go to "Gestão de Usuários".
+3. Click "Convidar Usuário".
+4. Copy the generated link.
+5. Open an Incognito window and access the link.
+6. Complete registration and verify role assignment in the dashboard.
 
-```bash
-INITIAL_SUPERADMIN_EMAIL=admin@empresa.com
-INITIAL_SUPERADMIN_PASSWORD=mudar_senha_123
-INVITATION_EXPIRY_HOURS=24
-```
-
-## Running Migrations
-
-Apply the database changes:
-
-```bash
-cd backend
-alembic upgrade head
-```
-
-## Creating an Invitation
-
-1. Log in as a `SUPERADMIN`, `ADMIN`, or `USUARIO_ADMIN`.
-2. Navigate to **Gerenciamento de Usuários** in the Sidebar.
-3. Click **Gerar Link de Convite**.
-4. Select the role for the new user (restricted by your own role).
-5. Copy the generated link and send it to the new user.
-
-## Registering via Invite
-
-1. Open the invitation link in a browser.
-2. The system validates the token and shows the registration form.
-3. Fill in the name and password.
-4. Upon submission, the account is created and the token is marked as used.
-
-## Navigation Changes
-
-- The **Inbox (Dúvidas)** is now located directly in the main Sidebar, below the Agent/Dashboard items.
-- The **Banco de Dados** screen no longer contains the "Inbox" tab.
+## RBAC Verification
+- **Admin**: Verify you CANNOT see the "Reset System" button or other Admins.
+- **Usuario Admin**: Verify you CANNOT see "Fine-tuning" or "Tools" in the sidebar.
+- **Usuario**: Verify you CANNOT see "Activate/Deactivate" in the Agent screen.

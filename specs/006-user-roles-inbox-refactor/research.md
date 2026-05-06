@@ -1,29 +1,23 @@
-# Research: Enhanced User Roles and Invitation System
+# Research: User Roles, Invitations, and UI Overhaul
 
-## Decisions
+## Decision 1: Animated Mesh Gradient Background
+- **Decision**: Implement a pure CSS animated background using radial gradients and keyframe animations.
+- **Rationale**: CSS gradients are lightweight, performant, and don't require external image assets or heavy JS libraries (like Three.js), aligning with "UX/UI Integrity" while maintaining high visual quality.
+- **Implementation**:
+  - Use 3-4 moving radial gradients with different colors (Primary, Secondary, Accent).
+  - Apply `filter: blur(100px)` for the mesh effect.
+  - Animation loop of 20-30s for a slow, premium feel.
 
-### 1. RBAC Implementation
-- **Decision**: Update the existing `User` model to include a `role` enum field: `SUPERADMIN`, `ADMIN`, `USUARIO_ADMIN`, `USUARIO`.
-- **Rationale**: Direct enum-based roles are efficient for small, rigid hierarchies and integrate well with SQLAlchemy and FastAPI dependencies.
-- **Alternatives considered**: Permission-based access (ACL). Rejected as too complex for the current requirements which are strictly hierarchical.
+## Decision 2: Invitation Token Logic
+- **Decision**: Use UUID4 for tokens and store them in the database with a mandatory `expires_at` timestamp.
+- **Rationale**: UUIDs provide enough entropy to prevent guessing. Database storage allows for easy invalidation (marking `is_used` or deleting) and role mapping.
+- **Alternatives considered**: 
+  - JWT for invitation: Rejected because we need to be able to revoke a link if an admin makes a mistake, which is harder with stateless JWTs without a blacklist.
 
-### 2. Invitation Link System
-- **Decision**: DB-backed single-use tokens. A new `Invitation` entity will store a random UUID token, the target role, and an expiration timestamp.
-- **Rationale**: Allows for easy invalidation (marking as used) and server-side tracking. Signed JWTs could work but would require a blacklist to be "single-use".
-- **Alternatives considered**: Signed JWTs with no DB state. Rejected due to difficulty in revoking/marking as "used" once clicked.
+## Decision 3: Role-Based Component Visibility (Frontend)
+- **Decision**: Centralize role checking in a `useRole` hook or helper and wrap restricted components (like the "Import" buttons in Knowledge Base) in a conditional renderer.
+- **Rationale**: Ensures consistency across the app and makes it easier to update permissions later if the constitution changes.
 
-### 3. Frontend Navigation Refactor
-- **Decision**: React Context-based role management. Components like the sidebar will consume a `useAuth` hook to conditionally render items.
-- **Rationale**: Centralizes logic and prevents "prop drilling" for permission checks.
-- **Alternatives considered**: Route-level guards only. Rejected because sidebar and button-level visibility are also required.
-
-### 4. Initial Superadmin Provisioning
-- **Decision**: Backend startup script (Alembic or FastAPI `on_event("startup")`) will check for an existing Superadmin. If none exists, it creates one using `.env` variables `INITIAL_SUPERADMIN_EMAIL` and `INITIAL_SUPERADMIN_PASSWORD`.
-- **Rationale**: Ensures the system is usable immediately after deployment on a new server.
-- **Alternatives considered**: Manual DB entry via CLI. Rejected as less user-friendly for automated on-premise deployments.
-
-## Best Practices
-
-- **Token Security**: Use `secrets.token_urlsafe()` for invitation tokens to ensure cryptographic strength.
-- **Bcrypt Hashing**: Ensure all passwords (including the initial one) are hashed using `bcrypt` before storage.
-- **Atomic Deletions**: When a `USUARIO_ADMIN` deletes a `USUARIO`, ensure cascading deletions (if any) are handled to avoid orphaned data.
+## Decision 4: API Route Guarding (Backend)
+- **Decision**: Enhance the `check_role` dependency in `backend/main.py` to support multi-role validation and hierarchy checks.
+- **Rationale**: DRY principle. Centralized security logic reduces the risk of accidental exposure.
