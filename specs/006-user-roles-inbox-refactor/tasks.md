@@ -32,6 +32,7 @@
 - [ ] T006 [P] Update JWT token payload to include `role` in `backend/src/services/auth_service.py`
 - [ ] T007 [P] Create `RoleGuard` utility in `frontend/src/utils/guards.ts` for UI conditional rendering
 - [ ] T008 [P] Implement `check_role` dependency/middleware in `backend/src/api/deps.py`
+- [ ] T008.1 [P] Implement `AuditLogger` service to track system modifications in `backend/src/services/audit_service.py`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -51,6 +52,7 @@
 - [ ] T012 [US1] Add self-demotion protection check in user service `backend/src/services/user_service.py`
 - [ ] T013 [P] [US1] Create User List management screen in `frontend/src/pages/admin/UserManagement.tsx`
 - [ ] T014 [US1] Implement role-based row actions (Promote/Delete) in `frontend/src/components/users/UserTableRow.tsx`
+- [ ] T014.1 [US1] Integrate `AuditLogger` to record role changes and user deletions in `backend/src/api/v1/endpoints/users.py`
 
 **Checkpoint**: User Story 1 functional - Team and Client roles are isolated.
 
@@ -67,8 +69,9 @@
 - [ ] T015 [US1] Apply `RoleGuard` to Agent Configuration screen in `frontend/src/pages/agent/AgentConfig.tsx` to hide edit fields for Clients
 - [ ] T016 [US2] Update `PATCH /api/v1/agent` endpoint to restrict modification to Team roles in `backend/src/api/v1/endpoints/agent.py`
 - [ ] T017 [US2] Implement restricted Agent Toggle visibility (available to `USUARIO_ADMIN`, hidden for `USUARIO`) in `frontend/src/components/agent/AgentStatusToggle.tsx`
-- [ ] T018 [US2] Update Database screen in `frontend/src/pages/database/Database.tsx` to hide bulk import options for non-Team roles
+- [ ] T018 [US2] Update Database screen in `frontend/src/pages/database/Database.tsx` to hide bulk import options and RESTRICT the "✨ Adicionar Novo" button to open the specific modal for `USUARIO_ADMIN`
 - [ ] T019 [US2] Hide "Edit" and "Delete" buttons for knowledge entries when user is `USUARIO` in `frontend/src/components/database/KnowledgeItem.tsx`
+- [ ] T019.1 [US2] Integrate `AuditLogger` to track agent configuration changes in `backend/src/api/v1/endpoints/agent.py`
 
 **Checkpoint**: User Story 2 functional - Client roles have restricted system modification access.
 
@@ -88,6 +91,7 @@
 - [ ] T023 [US3] Create public Registration page in `frontend/src/pages/auth/Register.tsx` (consumes token)
 - [ ] T024 [US3] Implement `POST /api/v1/invitations/register` logic with token validation in `backend/src/api/v1/endpoints/auth.py`
 - [ ] T025 [US3] Remove manual "Add User" form from all existing UI screens in `frontend/src/pages/admin/`
+- [ ] T025.1 [US3] Integrate `AuditLogger` to track invitation generation and registration events in `backend/src/api/v1/endpoints/invitations.py`
 
 **Checkpoint**: User Story 3 functional - Secure invitation system active.
 
@@ -105,6 +109,7 @@
 - [ ] T027 [US4] Add "Inbox" menu item to Sidebar configuration in `frontend/src/components/layout/Sidebar.tsx`
 - [ ] T028 [US4] Implement role-based "Delete" permission for unanswered questions in `frontend/src/pages/inbox/Inbox.tsx`
 - [ ] T029 [US4] Update `DELETE /api/v1/inbox/{id}` to restrict to Team roles for unanswered items in `backend/src/api/v1/endpoints/inbox.py`
+- [ ] T029.1 [US4] Verify that `USUARIO` and `USUARIO_ADMIN` roles can still reply to questions (FR-011) in `frontend/src/pages/inbox/Inbox.tsx`
 
 **Checkpoint**: User Story 4 functional - Navigation refactor complete.
 
