@@ -12,6 +12,8 @@ Auto-generated from all feature plans. Last updated: 2026-05-06
 - Python 3.11 (Backend), Node.js (Frontend) + FastAPI, SQLAlchemy, TaskIQ, RabbitMQ, Vite, React (006-user-roles-inbox-refactor)
 - Python 3.11, React 18+ + FastAPI, SQLAlchemy (async), Pydantic v2, TaskIQ, Tailwind CSS (006-user-roles-inbox-refactor)
 - PostgreSQL (pgvector) (006-user-roles-inbox-refactor)
+- Python 3.11+, TypeScript (React 18+) + FastAPI, TaskIQ, RabbitMQ, Pydantic v2, Tailwind CSS, shadcn/ui (006-user-roles-inbox-refactor)
+- PostgreSQL (SQLAlchemy + Alembic) (006-user-roles-inbox-refactor)
 
 - (001-migrate-celery-to-taskiq)
 
@@ -31,9 +33,9 @@ tests/
 : Follow standard conventions
 
 ## Recent Changes
+- 006-user-roles-inbox-refactor: Added Python 3.11+, TypeScript (React 18+) + FastAPI, TaskIQ, RabbitMQ, Pydantic v2, Tailwind CSS, shadcn/ui
 - 006-user-roles-inbox-refactor: Added Python 3.11, React 18+ + FastAPI, SQLAlchemy (async), Pydantic v2, TaskIQ, Tailwind CSS
 - 006-user-roles-inbox-refactor: Added Python 3.11 (Backend), Node.js (Frontend) + FastAPI, SQLAlchemy, TaskIQ, RabbitMQ, Vite, React
-- 005-modal-navigation-edit: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 
 <!-- MANUAL ADDITIONS START -->

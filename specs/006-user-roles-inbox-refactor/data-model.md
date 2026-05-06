@@ -1,28 +1,39 @@
-# Data Model: User Roles and Invitations
+# Data Model: Enhanced User Roles and Invitations
 
-## User (Existing Entity Updated)
-- `id`: Integer (PK)
-- `name`: String
-- `email`: String (Unique)
-- `password`: String (Hashed)
-- `role`: Enum (SUPERADMIN, ADMIN, USUARIO_ADMIN, USUARIO)
-- `status`: String (ATIVO, INATIVO)
-- `created_at`: DateTime
-- `updated_at`: DateTime
+## Updated Entities
 
-## InvitationLink (New Entity)
-- `id`: Integer (PK)
-- `token`: UUID (Unique, Index)
-- `target_role`: String (Role to be granted upon registration)
-- `created_by_id`: Integer (FK to User)
-- `created_at`: DateTime (Default now)
-- `expires_at`: DateTime (Default now + 24h)
-- `used_at`: DateTime (Nullable)
-- `is_revoked`: Boolean (Default false)
+### User (Table: `users`)
+Updated to include new role hierarchy.
 
-## AuditLog (Existing Entity)
-- `id`: Integer (PK)
-- `user_id`: Integer (FK to User, Nullable for registration)
-- `action`: String (e.g., "CREATE_INVITATION", "REGISTER_USER", "UPDATE_ROLE")
-- `details`: JSON (Before/After values)
-- `timestamp`: DateTime
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | Integer | PK |
+| `name` | String | User's full name |
+| `email` | String | Unique, used for login |
+| `password` | String | Bcrypt hash |
+| `role` | String | `SUPERADMIN`, `ADMIN`, `USUARIO_ADMIN`, `USUARIO` |
+| `status` | String | `ATIVO`, `INATIVO` |
+| `created_at`| DateTime | Auto-now |
+
+---
+
+## New Entities
+
+### InvitationLink (Table: `invitation_links`)
+Stores tokens for new user registration.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | Integer | PK |
+| `token` | String (Unique) | Secure random string |
+| `target_role`| String | The role the user will get upon registration |
+| `created_by` | Integer | FK to `users.id` |
+| `expires_at` | DateTime | `created_at` + 24 hours |
+| `is_used` | Boolean | Default: `False` |
+
+---
+
+## Relationships
+
+- **User → InvitationLink**: One User (Admin/Superadmin) can create many invitation links.
+- **Agent → Role**: Access to Agent config is filtered by Role (Team roles only).

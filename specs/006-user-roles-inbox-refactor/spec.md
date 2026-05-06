@@ -61,11 +61,11 @@ New users (Admins or Users) are added via unique, time-limited invitation links 
 The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar item.
 
 **Why this priority**: Improves visibility and access to the frequently used FAQ feature.
-**Independent Test**: Open the app and verify the "Inbox" icon is in the sidebar and the tab is gone from the Database screen.
+**Independent Test**: Open the app and verify the "Inbox" icon is in the sidebar and the tab is gone from the Base de Conhecimento screen.
 
 **Acceptance Scenarios**:
 1. **Given** any user, **When** looking at the sidebar, **Then** the "Inbox" menu item is visible.
-2. **Given** any user, **When** viewing the Database screen, **Then** no "Inbox" tab is present.
+2. **Given** any user, **When** viewing the Base de Conhecimento screen, **Then** no "Inbox" tab is present.
 3. **Given** an Admin, **When** in the Inbox, **Then** they can delete unanswered questions, whereas a User can only reply.
 
 ---
@@ -80,7 +80,7 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 
 ### Functional Requirements
 
-- **FR-001**: System MUST move the "Inbox/FAQ" component from the Database screen tabs to the main Sidebar navigation.
+- **FR-001**: System MUST move the "Inbox/FAQ" component from the Base de Conhecimento screen tabs to the main Sidebar navigation.
 - **FR-002**: System MUST implement four roles: `SUPERADMIN`, `ADMIN` (Team), `USUARIO_ADMIN`, and `USUARIO` (Clients).
 - **FR-003**: Superadmin MUST be created automatically during system initialization (default credentials).
 - **FR-004**: Superadmin MUST be able to grant `SUPERADMIN` status to `ADMIN` users.
@@ -95,6 +95,9 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - **FR-011**: Inbox access: All roles can view and reply to questions.
 - **FR-012**: Inbox cleanup: Only Team roles (`SUPERADMIN`, `ADMIN`) can delete questions that have not been answered.
 - **FR-013**: User Creation: System MUST generate a unique, single-use registration link valid for 24 hours. Manual user creation forms MUST be removed for all management screens.
+- **FR-017**: User Management MUST NOT have an "Edit" button for any role. Role promotion/demotion actions (`SUPERADMIN` only) MUST be implemented as independent action buttons.
+- **FR-018**: The "Meus Agentes" screen MUST be refactored to a tabbed interface with two tabs: "Meus Agentes" and "Variáveis de Contexto Globais".
+- **FR-019**: The "Variáveis de Contexto Globais" tab MUST ONLY be visible to `SUPERADMIN` and `ADMIN` roles. For `USUARIO_ADMIN` and `USUARIO`, the entire tab bar MUST be hidden, showing only the agents list.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -130,3 +133,5 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - Q: What is the management scope for USUARIO_ADMIN? → A: Can invite both USUARIO_ADMIN and USUARIO.
 - Q: What is the visual style for the registration page? → A: Dynamic background with animated gradients.
 - Q: How to handle Knowledge Base addition buttons for clients? → A: Hide all advanced/bulk methods, only show "Adicionar Novo" for Usuario Admin.
+- Q: By removing the "editar" button for all roles in User Management, should the Superadmin still have independent buttons to "Promote/Revoke" status? → A: Yes, dedicated buttons for these actions remain only for Superadmins.
+- Q: How should the "Meus Agentes" screen behave for users without access to Global Variables? → A: The tab bar must be hidden entirely, displaying only the agents list.
