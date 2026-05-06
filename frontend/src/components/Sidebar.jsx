@@ -88,7 +88,7 @@ const Sidebar = ({ onLogout }) => {
                 <nav className="sidebar-nav">
                     <div className="nav-section">
                         <span className="nav-section-title">GERENCIAMENTO</span>
-                        {(isTeam || isUser) && (
+                        {(isManagement || isUser) && (
                             <NavLink
                                 to="/"
                                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
@@ -98,7 +98,6 @@ const Sidebar = ({ onLogout }) => {
                                 <div className="active-indicator"></div>
                             </NavLink>
                         )}
-                        {/* Inbox available to all for now, as it will replace the widget FAQ/Inbox */}
                         <NavLink
                             to="/inbox"
                             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
@@ -108,6 +107,16 @@ const Sidebar = ({ onLogout }) => {
                             <div className="active-indicator"></div>
                         </NavLink>
 
+                        {isManagement && (
+                            <NavLink
+                                to="/knowledge-bases"
+                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                            >
+                                <span className="nav-icon">📚</span>
+                                <span className="nav-label">Bases de Conhecimento</span>
+                                <div className="active-indicator"></div>
+                            </NavLink>
+                        )}
                         {isTeam && (
                             <>
                                 <NavLink
@@ -116,14 +125,6 @@ const Sidebar = ({ onLogout }) => {
                                 >
                                     <span className="nav-icon">🎧</span>
                                     <span className="nav-label">Suporte Humano</span>
-                                    <div className="active-indicator"></div>
-                                </NavLink>
-                                <NavLink
-                                    to="/knowledge-bases"
-                                    className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                                >
-                                    <span className="nav-icon">📚</span>
-                                    <span className="nav-label">Bases de Conhecimento</span>
                                     <div className="active-indicator"></div>
                                 </NavLink>
                                 <NavLink

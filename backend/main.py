@@ -205,6 +205,9 @@ class BulkSummarizeRequest(BaseModel):
     metadata_val: str
     category: str = "Geral"
 
+class RoleUpdate(BaseModel):
+    role: str
+
 class UserCreate(BaseModel):
     name: str = "Novo Usuário"
     email: str
@@ -435,6 +438,13 @@ async def delete_user(
     if user_role == UserRole.ADMIN.value and db_user.role == UserRole.SUPERADMIN.value:
         raise HTTPException(status_code=403, detail="Administradores não podem deletar o Super Admin.")
     
+    # Proteção: Último Super Admin
+    if db_user.role == UserRole.SUPERADMIN.value:
+        count_res = await db.execute(select(func.count(UserModel.id)).where(UserModel.role == UserRole.SUPERADMIN.value))
+        count = count_res.scalar()
+        if count <= 1:
+            raise HTTPException(status_code=400, detail="Não é possível deletar o último Super Admin.")
+    
     await db.delete(db_user)
     await db.commit()
     
@@ -442,6 +452,38 @@ async def delete_user(
     await AuditLogger.log(db, "DELETE_USER", {"target_id": user_id, "target_email": db_user.email}, user_id=current_user["id"])
     
     return {"success": True}
+
+@app.patch("/users/{user_id}/role", dependencies=[Depends(verify_api_key)])
+async def update_user_role(
+    user_id: int, 
+    req: RoleUpdate, 
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(check_role([UserRole.SUPERADMIN.value]))
+):
+    """Permite que um Superadmin altere o papel de qualquer usuário."""
+    result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+    db_user = result.scalar_one_or_none()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    if req.role not in [r.value for r in UserRole]:
+        raise HTTPException(status_code=400, detail="Papel inválido")
+
+    # Proteção: Se estiver despromovendo um Superadmin, garante que não seja o único
+    if db_user.role == UserRole.SUPERADMIN.value and req.role != UserRole.SUPERADMIN.value:
+        count_res = await db.execute(select(func.count(UserModel.id)).where(UserModel.role == UserRole.SUPERADMIN.value))
+        count = count_res.scalar()
+        if count <= 1:
+            raise HTTPException(status_code=400, detail="Não é possível despromover o último Super Admin.")
+
+    old_role = db_user.role
+    db_user.role = req.role
+    await db.commit()
+    
+    from services.audit_service import AuditLogger
+    await AuditLogger.log(db, "PROMOTE_USER", {"target_id": user_id, "old_role": old_role, "new_role": req.role}, user_id=current_user["id"])
+    
+    return {"success": True, "new_role": db_user.role}
 
 # --- INVITATION SYSTEM ---
 import secrets
@@ -460,8 +502,8 @@ async def create_invitation(
     user_role = current_user["role"]
     
     # Restrições de convite
-    if user_role == UserRole.USUARIO_ADMIN.value and req.target_role != UserRole.USUARIO.value:
-        raise HTTPException(status_code=403, detail="Você só pode convidar Usuários comuns.")
+    if user_role == UserRole.USUARIO_ADMIN.value and req.target_role not in [UserRole.USUARIO.value, UserRole.USUARIO_ADMIN.value]:
+        raise HTTPException(status_code=403, detail="Você só pode convidar Usuários ou Usuários Admins.")
     
     if user_role == UserRole.ADMIN.value and req.target_role == UserRole.SUPERADMIN.value:
         raise HTTPException(status_code=403, detail="Administradores não podem convidar Super Admins.")
@@ -744,12 +786,12 @@ async def get_google_status(agent_id: int | None = None, db: AsyncSession = Depe
     return {"connected": token is not None}
 
 # --- KNOWLEDGE BASE ENDPOINTS ---
-@app.get("/knowledge-bases", response_model=List[KnowledgeBase], dependencies=[Depends(verify_api_key)])
+@app.get("/knowledge-bases", response_model=List[KnowledgeBase], dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))])
 async def list_knowledge_bases(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(KnowledgeBaseModel).options(selectinload(KnowledgeBaseModel.items)))
     return result.scalars().all()
 
-@app.post("/knowledge-bases", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key)])
+@app.post("/knowledge-bases", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def create_knowledge_base(kb: KnowledgeBase, db: AsyncSession = Depends(get_db)):
     # Check for duplicate name
     result = await db.execute(select(KnowledgeBaseModel).where(KnowledgeBaseModel.name == kb.name))
@@ -772,7 +814,7 @@ async def create_knowledge_base(kb: KnowledgeBase, db: AsyncSession = Depends(ge
         updated_at=db_kb.updated_at
     )
 
-@app.get("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key)])
+@app.get("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))])
 async def get_knowledge_base(kb_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(KnowledgeBaseModel)
@@ -784,7 +826,7 @@ async def get_knowledge_base(kb_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Knowledge Base not found")
     return kb
 
-@app.put("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key)])
+@app.put("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def update_knowledge_base(kb_id: int, kb: KnowledgeBase, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(KnowledgeBaseModel).where(KnowledgeBaseModel.id == kb_id))
     db_kb = result.scalars().first()
@@ -828,7 +870,7 @@ async def update_knowledge_base(kb_id: int, kb: KnowledgeBase, db: AsyncSession 
         updated_at=db_kb.updated_at
     )
 
-@app.delete("/knowledge-bases/{kb_id}", dependencies=[Depends(verify_api_key)])
+@app.delete("/knowledge-bases/{kb_id}", dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def delete_knowledge_base(kb_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(KnowledgeBaseModel).where(KnowledgeBaseModel.id == kb_id))
     kb = result.scalars().first()
@@ -2399,7 +2441,7 @@ async def check_coverage(kb_id: int, payload: CoverageCheckRequest, db: AsyncSes
     return {"results": results}
 
 # --- AGENT MANAGEMENT UPDATED ---
-@app.get("/agents", response_model=List[AgentConfig], dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
+@app.get("/agents", response_model=List[AgentConfig], dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value, UserRole.USUARIO.value]))])
 async def list_agents(db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(AgentConfigModel)
@@ -2648,7 +2690,7 @@ async def get_agent(agent_id: int, db: AsyncSession = Depends(get_db)):
         model_settings=json.loads(db_config.model_settings) if db_config.model_settings else {}
     )
 
-@app.put("/agents/{agent_id}", response_model=AgentConfig, dependencies=[Depends(verify_api_key)])
+@app.put("/agents/{agent_id}", response_model=AgentConfig, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def update_agent(agent_id: int, config: AgentConfig, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(AgentConfigModel)
@@ -2798,7 +2840,7 @@ async def list_agent_drafts(agent_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(PromptDraftModel).where(PromptDraftModel.agent_id == agent_id).order_by(PromptDraftModel.created_at.desc()))
     return result.scalars().all()
 
-@app.post("/agents/{agent_id}/toggle", response_model=AgentConfig, dependencies=[Depends(verify_api_key)])
+@app.post("/agents/{agent_id}/toggle", response_model=AgentConfig, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))])
 async def toggle_agent_status(agent_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(AgentConfigModel).where(AgentConfigModel.id == agent_id).options(selectinload(AgentConfigModel.tools)))
     db_config = result.scalars().first()

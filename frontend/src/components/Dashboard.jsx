@@ -3,11 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import ConfirmModal from './ConfirmModal';
+import { USER_ROLES } from '../constants/auth';
 
 function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
     const navigate = useNavigate();
-    const userRole = localStorage.getItem('user_role') || 'Usuário';
-    const isUser = userRole === 'Usuário';
+    const userRole = localStorage.getItem('user_role');
+    const isTeam = userRole === USER_ROLES.SUPERADMIN || userRole === USER_ROLES.ADMIN;
+    const isUsuarioAdmin = userRole === USER_ROLES.USUARIO_ADMIN;
+    const isUsuario = userRole === USER_ROLES.USUARIO || !userRole;
 
     return (
         <div className={`modern-agent-card ${!agent.is_active ? 'inactive' : ''}`}>
@@ -16,7 +19,7 @@ function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
                     className={`status-indicator ${agent.is_active ? 'active' : 'paused'}`}
                     title={agent.is_active ? 'Online' : 'Pausado'}
                 ></div>
-                {!isUser && (
+                {(isTeam || isUsuarioAdmin) && (
                     <div className="card-actions-top">
                         <button onClick={(e) => {
                             e.stopPropagation();
@@ -25,11 +28,14 @@ function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
                                 .then(() => onShare('Link copiado com sucesso!', 'success'))
                                 .catch(() => onShare('Erro ao copiar link.', 'error'));
                         }} title="Compartilhar Link Público">🔗</button>
-                        <button onClick={() => onDuplicate(agent)} title="Duplicar">📑</button>
+                        
+                        {isTeam && <button onClick={() => onDuplicate(agent)} title="Duplicar">📑</button>}
+                        
                         <button onClick={() => onPause(agent)} title={agent.is_active ? 'Pausar' : 'Ativar'}>
                             {agent.is_active ? '⏸️' : '▶️'}
                         </button>
-                        <button onClick={(e) => onDelete(e, agent.id, agent.name)} title="Excluir" className="delete-action">🗑️</button>
+                        
+                        {isTeam && <button onClick={(e) => onDelete(e, agent.id, agent.name)} title="Excluir" className="delete-action">🗑️</button>}
                     </div>
                 )}
             </div>
@@ -52,10 +58,10 @@ function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
                 </div>
             </div>
 
-            <div className={`card-footer ${isUser ? 'user-view' : ''}`}>
-                {!isUser && (
+            <div className={`card-footer ${isUsuario ? 'user-view' : ''}`}>
+                {!isUsuario && (
                     <button onClick={() => navigate(`/agent/${agent.id}`)} className="btn-primary">
-                        ⚙️ Configurar
+                        {isTeam ? '⚙️ Configurar' : '⚙️ Ver Config.'}
                     </button>
                 )}
                 <button
@@ -64,7 +70,7 @@ function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
                     className="btn-secondary"
                     style={{
                         opacity: agent.is_active ? 1 : 0.5,
-                        gridColumn: isUser ? '1 / span 2' : 'auto'
+                        gridColumn: isUsuario ? '1 / span 2' : 'auto'
                     }}
                 >
                     💬 Chat
@@ -218,8 +224,10 @@ function Dashboard() {
 
     const uniqueModels = [...new Set(agents.map(a => a.model))];
 
-    const userRole = localStorage.getItem('user_role') || 'Usuário';
-    const isUser = userRole === 'Usuário';
+    const userRole = localStorage.getItem('user_role');
+    const isTeam = userRole === USER_ROLES.SUPERADMIN || userRole === USER_ROLES.ADMIN;
+    const isUsuarioAdmin = userRole === USER_ROLES.USUARIO_ADMIN;
+    const isUsuario = userRole === USER_ROLES.USUARIO || !userRole;
     const currentName = localStorage.getItem('user_name') || 'Usuário';
 
     return (
@@ -229,14 +237,14 @@ function Dashboard() {
                     <h1>Olá, {currentName} 👋</h1>
                     <p className="subtitle">Gerencie sua frota de agentes inteligentes</p>
                 </div>
-                {!isUser && (
+                {isTeam && (
                     <Link to="/agent/new" className="create-agent-btn-shiny">
                         + Novo Agente
                     </Link>
                 )}
             </header>
 
-            {!isUser && (
+            {!isUsuario && (
                 <>
                     {/* KPI Stats Row */}
                     <div className="stats-row fade-in">

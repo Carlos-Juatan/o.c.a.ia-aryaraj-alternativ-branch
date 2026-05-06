@@ -5,9 +5,9 @@
 ### Phase 1: Setup & Foundational
 Goal: Prepare the database schema and shared infrastructure.
 
-- [ ] T001 Create migration for the `invitations` table in `backend/alembic/versions/`
-- [ ] T002 Implement `InvitationModel` in `backend/models.py`
-- [ ] T003 [P] Add `UserRole` enum values (SUPERADMIN, ADMIN, USUARIO_ADMIN, USUARIO) to `backend/models.py` if not present
+- [x] T001 Create migration for the `invitations` table in `backend/alembic/versions/`
+- [x] T002 Implement `InvitationModel` in `backend/models.py`
+- [x] T003 [P] Add `UserRole` enum values (SUPERADMIN, ADMIN, USUARIO_ADMIN, USUARIO) to `backend/models.py` if not present
 - [ ] T004 Create `AuthService` for invitation logic in `backend/services/auth_service.py`
 
 ### Phase 2: User Story 1 - Multi-tier Role Hierarchy (P1)

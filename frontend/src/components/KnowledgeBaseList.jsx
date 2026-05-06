@@ -3,8 +3,13 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import ConfirmModal from './ConfirmModal';
 import UnansweredQuestions from './UnansweredQuestions';
+import { USER_ROLES } from '../constants/auth';
 
 function KnowledgeBaseList() {
+    const userRole = localStorage.getItem('user_role');
+    const isTeam = userRole === USER_ROLES.SUPERADMIN || userRole === USER_ROLES.ADMIN;
+    const isManagement = isTeam || userRole === USER_ROLES.USUARIO_ADMIN;
+    
     const [bases, setBases] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -64,7 +69,7 @@ function KnowledgeBaseList() {
                         Gerencie bibliotecas de respostas e ensine seus agentes.
                     </p>
                 </div>
-                {activeTab === 'bases' && (
+                {isTeam && activeTab === 'bases' && (
                     <Link to="/knowledge-bases/new" className="create-agent-btn">
                         + Nova Base
                     </Link>
@@ -174,10 +179,15 @@ function KnowledgeBaseList() {
                                         ? "Crie sua primeira biblioteca de conhecimento para começar a treinar seus agentes de IA."
                                         : `Você ainda não possui bases do tipo ${filterType === 'qa' ? 'FAQ' : 'Produtos'}.`}
                                 </p>
-                                {filterType === 'all' && (
+                                {isTeam && filterType === 'all' && (
                                     <Link to="/knowledge-bases/new" className="create-agent-btn" style={{ marginTop: '2rem' }}>
                                         + Criar Minha Primeira Base
                                     </Link>
+                                )}
+                                {!isTeam && (
+                                    <p style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>
+                                        Contate um administrador para vincular bases de conhecimento a este painel.
+                                    </p>
                                 )}
                             </div>
                         ) : (
@@ -217,7 +227,7 @@ function KnowledgeBaseList() {
 
                                     <div className="agent-actions">
                                         <Link to={`/knowledge-bases/${base.id}?view=content`} className="access-btn">
-                                            Editar Conteúdo
+                                            {isTeam ? 'Editar Conteúdo' : 'Ver Conteúdo'}
                                         </Link>
                                         <Link 
                                             to={`/knowledge-bases/${base.id}?view=metadata`} 
@@ -227,13 +237,15 @@ function KnowledgeBaseList() {
                                         >
                                             ⚙️
                                         </Link>
-                                        <button
-                                            onClick={(e) => handleDeleteClick(e, base.id, base.name)}
-                                            className="delete-btn"
-                                            title="Excluir Base"
-                                        >
-                                            🗑️
-                                        </button>
+                                        {isTeam && (
+                                            <button
+                                                onClick={(e) => handleDeleteClick(e, base.id, base.name)}
+                                                className="delete-btn"
+                                                title="Excluir Base"
+                                            >
+                                                🗑️
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))

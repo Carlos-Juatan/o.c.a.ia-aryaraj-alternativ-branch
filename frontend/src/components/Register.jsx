@@ -77,7 +77,8 @@ const Register = () => {
 
   if (error) return (
     <div className="login-container">
-      <div className="login-box card-premium">
+      <div className="mesh-background"></div>
+      <div className="login-box card-premium" style={{ borderColor: '#ef4444' }}>
         <h2 style={{ color: '#ef4444' }}>Ops!</h2>
         <p>{error}</p>
         <button className="login-btn" onClick={() => navigate('/login')} style={{ marginTop: '1rem' }}>Voltar ao Login</button>
@@ -87,7 +88,8 @@ const Register = () => {
 
   return (
     <div className="login-container">
-      <div className="login-box card-premium">
+      <div className="mesh-background"></div>
+      <div className="login-box card-premium" style={{ backdropFilter: 'blur(20px)', background: 'rgba(15, 23, 42, 0.7)' }}>
         <div className="login-header">
           <div className="login-logo">🤖</div>
           <h1>Criar sua Conta</h1>

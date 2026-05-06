@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import ExpandableField from './ExpandableField';
 import KnowledgeBaseImporter from './KnowledgeBaseImporter';
 import ConfirmModal from './ConfirmModal';
+import { USER_ROLES } from '../constants/auth';
 
 /**
  * KnowledgeBaseManager Component
@@ -132,6 +133,10 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
         agenticEval: true,
         parentExpansion: true
     });
+
+    const userRole = localStorage.getItem('user_role');
+    const isTeam = userRole === USER_ROLES.SUPERADMIN || userRole === USER_ROLES.ADMIN;
+    const isManagement = isTeam || userRole === USER_ROLES.USUARIO_ADMIN;
 
     const handleJsonBatchSubmit = async () => {
         try {
@@ -864,16 +869,20 @@ const KnowledgeBaseManager = ({ knowledgeBase = [], onChange, onAdd, onDelete, o
             <div className="kb-content" style={{ animation: 'fadeIn 0.4s ease-out' }}>
                 <div className="kb-quick-actions">
                     <button onClick={() => setIsAddNewModalOpen(true)} className="kb-quick-action-btn">✨ Adicionar Novo</button>
-                    <button onClick={() => setIsAddDocsModalOpen(true)} className="kb-quick-action-btn">📂 Adicionar Documentos</button>
-                    <button onClick={() => setShowMediaSelectionModal(true)} className="kb-quick-action-btn">
-                        📽️ Transcrição de Vídeo
-                    </button>
-                    <button onClick={() => {
-                        setJsonBatchInput('');
-                        setIsJsonBatchModalOpen(true);
-                    }} className="kb-quick-action-btn">
-                        📄 Upload Json
-                    </button>
+                    {isTeam && (
+                        <>
+                            <button onClick={() => setIsAddDocsModalOpen(true)} className="kb-quick-action-btn">📂 Adicionar Documentos</button>
+                            <button onClick={() => setShowMediaSelectionModal(true)} className="kb-quick-action-btn">
+                                📽️ Transcrição de Vídeo
+                            </button>
+                            <button onClick={() => {
+                                setJsonBatchInput('');
+                                setIsJsonBatchModalOpen(true);
+                            }} className="kb-quick-action-btn">
+                                📄 Upload Json
+                            </button>
+                        </>
+                    )}
                     <input
                         type="file"
                         ref={videoInputRef}

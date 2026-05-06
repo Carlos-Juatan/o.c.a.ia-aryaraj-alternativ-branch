@@ -68,10 +68,7 @@ function App() {
                     {isTeam && (
                       <>
                         <Route path="/agent/new" element={<ConfigPanel />} />
-                        <Route path="/agent/:id" element={<ConfigPanel />} />
                         <Route path="/faq" element={<FAQ />} />
-                        <Route path="/knowledge-bases" element={<KnowledgeBaseList />} />
-                        <Route path="/knowledge-bases/:id" element={<KnowledgeBaseEditor />} />
                         <Route path="/tools" element={<ToolsManager standalone={true} />} />
                         <Route path="/financeiro" element={<Financeiro />} />
                         <Route path="/fine-tuning" element={<FineTuning />} />
@@ -83,7 +80,12 @@ function App() {
 
                     {/* Rota restrita para GESTÃO (Super Admin, Admin e Client Admin) */}
                     {isManagement && (
-                      <Route path="/users" element={<UserManagement />} />
+                      <>
+                        <Route path="/users" element={<UserManagement />} />
+                        <Route path="/agent/:id" element={<ConfigPanel />} />
+                        <Route path="/knowledge-bases" element={<KnowledgeBaseList />} />
+                        <Route path="/knowledge-bases/:id" element={<KnowledgeBaseEditor />} />
+                      </>
                     )}
 
                     {/* Redirecionar qualquer acesso não autorizado para a Home */}

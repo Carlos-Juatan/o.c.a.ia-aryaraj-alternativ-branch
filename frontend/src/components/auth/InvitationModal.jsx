@@ -64,7 +64,7 @@ const InvitationModal = ({ isOpen, onClose, userRole }) => {
                   style={{ width: '100%' }}
                 >
                   {Object.entries(ROLE_LABELS).map(([value, label]) => {
-                    if (isUsuarioAdmin && value !== USER_ROLES.USUARIO) return null;
+                    if (isUsuarioAdmin && value !== USER_ROLES.USUARIO && value !== USER_ROLES.USUARIO_ADMIN) return null;
                     if (isAdmin && value === USER_ROLES.SUPERADMIN) return null;
                     return <option key={value} value={value}>{label}</option>;
                   })}
