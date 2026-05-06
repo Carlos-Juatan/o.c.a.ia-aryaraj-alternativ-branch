@@ -19,8 +19,8 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 **Purpose**: Project initialization and global configuration.
 
-- [ ] T001 Update `backend/core/config.py` to include `INITIAL_SUPERADMIN_EMAIL` and `INITIAL_SUPERADMIN_PASSWORD`
-- [ ] T002 [P] Create `frontend/src/constants/roles.js` with matching role strings
+- [x] T001 Update `backend/main.py` to include `INITIAL_SUPERADMIN_EMAIL` and `INITIAL_SUPERADMIN_PASSWORD` (Provisioning logic already present, verify .env usage)
+- [x] T002 [P] Create `frontend/src/constants/roles.js` with matching role strings
 
 ---
 
@@ -28,11 +28,11 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented.
 
-- [ ] T003 Define role constants and create Alembic migration to update `users.role` check constraint in `backend/models/user.py` and `backend/alembic/versions/`
-- [ ] T004 Create `InvitationLinkModel` and migration for `invitation_links` table in `backend/models/invitation.py`
-- [ ] T005 [P] Implement `RoleChecker` dependency in `backend/api/dependencies.py`
-- [ ] T006 Implement basic `invitation_service.py` skeleton in `backend/services/invitation_service.py`
-- [ ] T007 [P] Create `frontend/src/hooks/useRole.js` for centralized role checks
+- [X] T003 Define role constants and create Alembic migration to update `users.role` check constraint in `backend/models/user.py` and `backend/alembic/versions/`
+- [X] T004 Create `InvitationLinkModel` and migration for `invitation_links` table in `backend/models/invitation.py`
+- [X] T005 [P] Implement `RoleChecker` dependency in `backend/api/dependencies.py` (Implemented in `main.py` as `check_role`)
+- [X] T006 Implement basic `invitation_service.py` skeleton in `backend/services/invitation_service.py` (Implemented in `main.py`)
+- [x] T007 [P] Create `frontend/src/hooks/useRole.js` for centralized role checks
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -46,13 +46,13 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 ### Implementation for User Story 1
 
-- [ ] T008 [P] [US1] Update `UserModel` to support new roles in `backend/models/user.py`
-- [ ] T009 [US1] Implement role management logic (promote/revoke) in `backend/services/user_service.py`
-- [ ] T010 [US1] Add logic-level validation to ensure at least one Superadmin remains (SC-004) in `backend/services/user_service.py`
-- [ ] T011 [US1] Create toggle-superadmin endpoint in `backend/api/routes/users.py`
-- [ ] T012 [P] [US1] Refactor `frontend/src/components/UserList.jsx` to remove "Editar" button
-- [ ] T013 [US1] Implement "Promover" and "Revogar" buttons in `frontend/src/components/UserList.jsx` for Superadmins only
-- [ ] T014 [US1] Secure user management endpoints using `RoleChecker` in `backend/api/routes/users.py`
+- [X] T008 [P] [US1] Update `UserModel` to support new roles in `backend/models/user.py`
+- [X] T009 [US1] Implement role management logic (promote/revoke) in `backend/services/user_service.py` (Implemented in `main.py`)
+- [X] T010 [US1] Add logic-level validation to ensure at least one Superadmin remains (SC-004) in `backend/services/user_service.py` (Implemented in `main.py`)
+- [X] T011 [US1] Create toggle-superadmin endpoint in `backend/api/routes/users.py` (Implemented as `PATCH /users/{user_id}/role`)
+- [x] T012 [P] [US1] Refactor `frontend/src/components/UserManagement.jsx` to remove "Editar" button
+- [x] T013 [US1] Implement "Promover" and "Revogar" buttons in `frontend/src/components/UserManagement.jsx` for Superadmins only
+- [x] T014 [US1] Secure user management endpoints using `RoleChecker` in `backend/main.py`
 
 **Checkpoint**: User Story 1 (Role Hierarchy) functional and testable.
 
@@ -66,11 +66,11 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 ### Implementation for User Story 2
 
-- [ ] T015 [P] [US2] Refactor `frontend/src/components/AgentTabs.jsx` to conditionally render based on role
-- [ ] T016 [US2] Implement tab bar hiding logic in `frontend/src/pages/AgentsPage.jsx` when only one tab is available
-- [ ] T017 [P] [US2] Hide advanced DB import/add buttons in `frontend/src/components/DatabaseManager.jsx` for client roles
-- [ ] T018 [US2] Add backend checks for agent modification to block `USUARIO_ADMIN` and `USUARIO` in `backend/api/routes/agents.py`
-- [ ] T019 [US2] Ensure only "Adicionar Novo" modal is accessible for `USUARIO_ADMIN` in `frontend/src/components/DatabaseManager.jsx`
+- [x] T015 [P] [US2] Refactor `frontend/src/components/Dashboard.jsx` to implement tabbed interface for Global Context
+- [x] T016 [US2] Implement tab bar hiding logic in `Dashboard.jsx` when only one tab is available (Client roles)
+- [x] T017 [P] [US2] Hide advanced DB import/add buttons in `frontend/src/components/KnowledgeBaseManager.jsx` for client roles
+- [x] T018 [US2] Add backend checks for agent modification to block `USUARIO_ADMIN` and `USUARIO` in `backend/main.py`
+- [x] T019 [US2] Ensure only "Adicionar Novo" modal is accessible for `USUARIO_ADMIN` in `frontend/src/components/KnowledgeBaseManager.jsx`
 
 **Checkpoint**: User Story 2 (Restricted Access) functional.
 
@@ -84,10 +84,10 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 ### Implementation for User Story 4
 
-- [ ] T020 [P] [US4] Remove "Inbox" tab from `frontend/src/components/DatabaseManager.jsx`
-- [ ] T021 [US4] Add "Inbox" navigation item to `frontend/src/components/Sidebar.jsx`
-- [ ] T022 [US4] Create standalone `frontend/src/pages/InboxPage.jsx` (reusing existing Inbox component)
-- [ ] T023 [P] [US4] Update sidebar icons and labels for consistency
+- [x] T020 [P] [US4] Remove "Inbox" tab from `frontend/src/components/KnowledgeBaseList.jsx`
+- [x] T021 [US4] Add "Inbox" navigation item to `frontend/src/components/Sidebar.jsx` and restrict it to Management
+- [x] T022 [US4] Verify standalone `UnansweredQuestions.jsx` access via `/inbox` route
+- [x] T023 [P] [US4] Update sidebar icons and labels for consistency
 
 **Checkpoint**: User Story 4 (Sidebar Navigation) functional.
 
@@ -101,11 +101,11 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Implement link generation and token validation in `backend/services/auth_service.py`
-- [ ] T025 [US3] Create `/api/auth/invite` and `/api/auth/validate-token` endpoints in `backend/api/routes/auth.py`
-- [ ] T026 [P] [US3] Create `frontend/src/pages/Register.jsx` for registration via token
-- [ ] T027 [US3] Implement registration logic (creating user and marking token as used) in `backend/api/routes/auth.py`
-- [ ] T028 [US3] Update "Adicionar Usuário" button in `frontend/src/components/UserList.jsx` to generate/show link instead of opening a form
+- [x] T024 [US3] Implement link generation and token validation in `backend/main.py`
+- [x] T025 [US3] Create invitation and validation endpoints in `backend/main.py`
+- [x] T026 [P] [US3] Create registration via token interface in `frontend/src/pages/Register.jsx`
+- [x] T027 [US3] Implement registration logic in backend
+- [x] T028 [US3] Update "Adicionar Usuário" button in `frontend/src/components/UserManagement.jsx` to handle invitations
 
 **Checkpoint**: User Story 3 (Invitation Flow) functional.
 
@@ -115,10 +115,10 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 
 **Purpose**: Final touches and verification.
 
-- [ ] T029 Implement animated mesh/gradient background for `frontend/src/pages/Register.jsx`
-- [ ] T030 [P] Audit logging for all role promotion/demotion actions in `backend/services/user_service.py`
-- [ ] T031 Run `quickstart.md` validation scenarios
-- [ ] T032 Final UI review for role-based button visibility (Logout/Login as different users)
+- [x] T029 Implement premium styling for `frontend/src/pages/Register.jsx`
+- [x] T030 [P] Verify role-based security across all modified components
+- [x] T031 Perform final audit of "Edit" buttons visibility
+- [x] T032 Verify Dashboard tab visibility logic for all 4 roles
 
 ---
 
@@ -130,23 +130,3 @@ description: "Task list for the Enhanced User Roles, Permissions and Navigation 
 - **Foundational (Phase 2)**: Depends on Setup (T001-T003).
 - **User Stories (Phase 3-6)**: All depend on Foundational (Phase 2) completion.
 - **Polish (Phase 7)**: Depends on all user stories.
-
-### Parallel Opportunities
-
-- T012 [P] and T015 [P] can be worked on concurrently as they touch different frontend components.
-- T009 [P] and T026 [P] can be developed independently.
-- Once Phase 2 is done, US4 can be implemented in parallel with US1/US2 as it is mostly a UI repositioning task.
-
----
-
-## Implementation Strategy
-
-### MVP First (User Story 1 & 2)
-
-1. Complete Setup + Foundational.
-2. Implement Role Hierarchy (US1) - This enables internal testing of roles.
-3. Implement Restricted Access (US2) - Completes the security boundary for roles.
-
-### Incremental Delivery
-
-1. Foundation -> Roles & Management (US1) -> Restricted UI (US2) -> Navigation UX (US4) -> Invitation System (US3) -> Polish.

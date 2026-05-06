@@ -2894,7 +2894,7 @@ async def toggle_agent_status(agent_id: int, db: AsyncSession = Depends(get_db))
         model_settings=json.loads(db_config.model_settings) if db_config.model_settings else {}
     )
 
-@app.post("/agents/{agent_id}/duplicate", response_model=AgentConfig, dependencies=[Depends(verify_api_key)])
+@app.post("/agents/{agent_id}/duplicate", response_model=AgentConfig, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def duplicate_agent(agent_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(AgentConfigModel).where(AgentConfigModel.id == agent_id).options(selectinload(AgentConfigModel.tools)))
     original = result.scalars().first()
@@ -2993,7 +2993,7 @@ async def duplicate_agent(agent_id: int, db: AsyncSession = Depends(get_db)):
         model_settings=json.loads(new_agent.model_settings) if new_agent.model_settings else {}
     )
 
-@app.post("/agents/{agent_id}/drafts", response_model=PromptDraft, dependencies=[Depends(verify_api_key)])
+@app.post("/agents/{agent_id}/drafts", response_model=PromptDraft, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def create_agent_draft(agent_id: int, draft: PromptDraft, db: AsyncSession = Depends(get_db)):
     db_draft = PromptDraftModel(
         agent_id=agent_id,
@@ -3007,7 +3007,7 @@ async def create_agent_draft(agent_id: int, draft: PromptDraft, db: AsyncSession
     await db.refresh(db_draft)
     return db_draft
 
-@app.delete("/drafts/{draft_id}", dependencies=[Depends(verify_api_key)])
+@app.delete("/drafts/{draft_id}", dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def delete_draft(draft_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(PromptDraftModel).where(PromptDraftModel.id == draft_id))
     draft = result.scalars().first()
@@ -3016,7 +3016,7 @@ async def delete_draft(draft_id: int, db: AsyncSession = Depends(get_db)):
         await db.commit()
     return {"message": "Draft deleted"}
     
-@app.put("/drafts/{draft_id}", response_model=PromptDraft, dependencies=[Depends(verify_api_key)])
+@app.put("/drafts/{draft_id}", response_model=PromptDraft, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def update_draft(draft_id: int, draft: PromptDraft, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(PromptDraftModel).where(PromptDraftModel.id == draft_id))
     db_draft = result.scalars().first()
@@ -3032,7 +3032,7 @@ async def update_draft(draft_id: int, draft: PromptDraft, db: AsyncSession = Dep
     await db.refresh(db_draft)
     return db_draft
 
-@app.delete("/agents/{agent_id}", dependencies=[Depends(verify_api_key)])
+@app.delete("/agents/{agent_id}", dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value]))])
 async def delete_agent(agent_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(AgentConfigModel).where(AgentConfigModel.id == agent_id))
     agent = result.scalars().first()

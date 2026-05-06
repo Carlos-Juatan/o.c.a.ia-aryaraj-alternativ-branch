@@ -98,14 +98,16 @@ const Sidebar = ({ onLogout }) => {
                                 <div className="active-indicator"></div>
                             </NavLink>
                         )}
-                        <NavLink
-                            to="/inbox"
-                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                        >
-                            <span className="nav-icon">📥</span>
-                            <span className="nav-label">Inbox / FAQ</span>
-                            <div className="active-indicator"></div>
-                        </NavLink>
+                        {isManagement && (
+                            <NavLink
+                                to="/inbox"
+                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                            >
+                                <span className="nav-icon">📥</span>
+                                <span className="nav-label">Inbox / FAQ</span>
+                                <div className="active-indicator"></div>
+                            </NavLink>
+                        )}
 
                         {isManagement && (
                             <NavLink
