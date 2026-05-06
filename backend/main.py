@@ -786,7 +786,7 @@ async def get_google_status(agent_id: int | None = None, db: AsyncSession = Depe
     return {"connected": token is not None}
 
 # --- KNOWLEDGE BASE ENDPOINTS ---
-@app.get("/knowledge-bases", response_model=List[KnowledgeBase], dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))])
+@app.get("/knowledge-bases", response_model=List[KnowledgeBase], dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value, UserRole.USUARIO.value]))])
 async def list_knowledge_bases(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(KnowledgeBaseModel).options(selectinload(KnowledgeBaseModel.items)))
     return result.scalars().all()
@@ -814,7 +814,7 @@ async def create_knowledge_base(kb: KnowledgeBase, db: AsyncSession = Depends(ge
         updated_at=db_kb.updated_at
     )
 
-@app.get("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))])
+@app.get("/knowledge-bases/{kb_id}", response_model=KnowledgeBase, dependencies=[Depends(verify_api_key), Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value, UserRole.USUARIO.value]))])
 async def get_knowledge_base(kb_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(KnowledgeBaseModel)
