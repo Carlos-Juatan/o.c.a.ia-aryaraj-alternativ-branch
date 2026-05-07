@@ -14,7 +14,7 @@ description: "Task list for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify project structure and role-based access utilities per implementation plan in `frontend/src/` and `backend/src/`
+- [x] T001 Verify project structure and role-based access utilities per implementation plan in `frontend/src/` and `backend/src/`
 
 ---
 
@@ -24,8 +24,8 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Identify or create role checking utilities for components in `frontend/src/utils/auth.js`
-- [ ] T003 Identify or create dependency for role verification in `backend/src/api/dependencies.py`
+- [x] T002 Identify or create role checking utilities for components in `frontend/src/utils/auth.js`
+- [x] T003 Identify or create dependency for role verification in `backend/src/api/dependencies.py`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -39,11 +39,11 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T004 [P] [US1] Ocultar abas de filtro e exibir apenas "Tudo" no painel de histórico de conversas em `frontend/src/components/ChatHistory.jsx`
-- [ ] T005 [P] [US1] Ocultar o botão "gerenciar conversas" para usuários comuns em `frontend/src/components/ChatHistory.jsx`
-- [ ] T006 [P] [US1] Desabilitar o botão "gerenciar conversas" para Admin quando o histórico estiver vazio em `frontend/src/components/ChatHistory.jsx`
-- [ ] T007 [P] [US1] Ocultar o botão "gerar perguntas" e mostrar apenas "excluir" ao selecionar conversas (Admin) em `frontend/src/components/ChatHistory.jsx`
-- [ ] T008 [P] [US1] Adicionar bloqueio na API para retornar 403 caso Admin tente acessar a rota de gerar perguntas em `backend/src/api/routes/questions.py`
+- [x] T004 [P] [US1] Ocultar abas de filtro e exibir apenas "Tudo" no painel de histórico de conversas em `frontend/src/components/ChatPlayground.jsx`
+- [x] T005 [P] [US1] Ocultar o botão "gerenciar conversas" para usuários comuns em `frontend/src/components/ChatPlayground.jsx`
+- [x] T006 [P] [US1] Desabilitar o botão "gerenciar conversas" para Admin quando o histórico estiver vazio em `frontend/src/components/ChatPlayground.jsx`
+- [x] T007 [P] [US1] Ocultar o botão "gerar perguntas" e mostrar apenas "excluir" ao selecionar conversas (Admin) em `frontend/src/components/ChatPlayground.jsx`
+- [x] T008 [P] [US1] Adicionar bloqueio na API para retornar 403 caso Admin tente acessar a rota de gerar perguntas em `backend/src/api/routes/questions.py`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -57,7 +57,7 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T009 [P] [US2] Adicionar estilo de largura total (w-full) ao botão "Chat" para o perfil Admin em `frontend/src/components/AgentCard.jsx`
+- [x] T009 [P] [US2] Adicionar estilo de largura total (w-full) ao botão "Chat" para o perfil Admin em `frontend/src/components/AgentCard.jsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -71,7 +71,7 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T010 [P] [US3] Adicionar item de navegação para "inbox de dúvidas" visível apenas para usuários comuns em `frontend/src/components/Sidebar.jsx`
+- [x] T010 [P] [US3] Adicionar item de navegação para "inbox de dúvidas" visível apenas para usuários comuns em `frontend/src/components/Sidebar.jsx`
 
 **Checkpoint**: All user stories up to 3 should now be independently functional
 
@@ -85,7 +85,7 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 4
 
-- [ ] T011 [P] [US4] Atualizar lógica de parsing de markdown para renderizar `*texto*` em negrito em `frontend/src/components/ChatMessage.jsx`
+- [x] T011 [P] [US4] Atualizar lógica de parsing de markdown para renderizar `*texto*` em negrito em `frontend/src/components/ChatMessage.jsx`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -95,7 +95,7 @@ description: "Task list for feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T012 Run quickstart.md validation
+- [x] T012 Run quickstart.md validation
 
 ---
 

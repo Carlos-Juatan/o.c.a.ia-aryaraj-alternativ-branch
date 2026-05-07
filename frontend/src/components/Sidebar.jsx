@@ -98,7 +98,7 @@ const Sidebar = ({ onLogout }) => {
                                 <div className="active-indicator"></div>
                             </NavLink>
                         )}
-                        {isManagement && (
+                        {(isManagement || isUser) && (
                             <NavLink
                                 to="/inbox"
                                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
