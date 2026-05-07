@@ -71,7 +71,6 @@ function App() {
                         <Route path="/agent/new" element={<ConfigPanel />} />
                         <Route path="/faq" element={<FAQ />} />
                         <Route path="/tools" element={<ToolsManager standalone={true} />} />
-                        <Route path="/financeiro" element={<Financeiro />} />
                         <Route path="/fine-tuning" element={<FineTuning />} />
                         <Route path="/integrations" element={<IntegrationsPanel />} />
                         <Route path="/background-tasks" element={<BackgroundTasks />} />
@@ -82,6 +81,7 @@ function App() {
                     {/* Rota restrita para GESTÃO (Super Admin, Admin e Client Admin) */}
                     {isManagement && (
                       <>
+                        <Route path="/financeiro" element={<Financeiro />} />
                         <Route path="/users" element={<UserManagement />} />
                         <Route path="/agent/:id" element={<ConfigPanel />} />
                         <Route path="/knowledge-bases" element={<KnowledgeBaseList />} />
