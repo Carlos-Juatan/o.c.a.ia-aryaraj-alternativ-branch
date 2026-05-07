@@ -18,6 +18,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import UserManagement from './components/UserManagement';
 import SupportDashboard from './components/SupportDashboard';
+import UnansweredQuestions from './components/UnansweredQuestions';
 import PublicSupportView from './components/PublicSupportView';
 import PublicQuestionsView from './components/PublicQuestionsView';
 import BackgroundTasks from './components/BackgroundTasks';
@@ -62,7 +63,7 @@ function App() {
                     {/* Rotas Comuns */}
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/playground" element={<ChatPlayground />} />
-                    <Route path="/inbox" element={<SupportDashboard />} /> {/* SupportDashboard will serve as Inbox for now */}
+                    <Route path="/inbox" element={<UnansweredQuestions />} />
 
                     {/* Rotas restritas para o TIME (Admin e Super Admin) */}
                     {isTeam && (
