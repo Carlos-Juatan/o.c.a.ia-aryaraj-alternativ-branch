@@ -1,6 +1,6 @@
 # o.c.a.ia-aryaraj-alternativ-branch Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-06
+Auto-generated from all feature plans. Last updated: 2026-05-07
 
 ## Active Technologies
 - Python 3.12+ (Backend), TypeScript/JavaScript (Frontend) + FastAPI, TaskIQ, Pydantic v2, React 19, Vitest, pytest-asyncio (003-fix-legacy-tests)
@@ -14,6 +14,7 @@ Auto-generated from all feature plans. Last updated: 2026-05-06
 - PostgreSQL (pgvector) (006-user-roles-inbox-refactor)
 - Python 3.11+, TypeScript (React 18+) + FastAPI, TaskIQ, RabbitMQ, Pydantic v2, Tailwind CSS, shadcn/ui (006-user-roles-inbox-refactor)
 - PostgreSQL (SQLAlchemy + Alembic) (006-user-roles-inbox-refactor)
+- TypeScript (Frontend React), Python (Backend FastAPI) + React, Tailwind CSS, shadcn/ui, FastAPI (007-fix-ui-permissions)
 
 - (001-migrate-celery-to-taskiq)
 
@@ -33,9 +34,9 @@ tests/
 : Follow standard conventions
 
 ## Recent Changes
+- 007-fix-ui-permissions: Added TypeScript (Frontend React), Python (Backend FastAPI) + React, Tailwind CSS, shadcn/ui, FastAPI
 - 006-user-roles-inbox-refactor: Added Python 3.11+, TypeScript (React 18+) + FastAPI, TaskIQ, RabbitMQ, Pydantic v2, Tailwind CSS, shadcn/ui
 - 006-user-roles-inbox-refactor: Added Python 3.11, React 18+ + FastAPI, SQLAlchemy (async), Pydantic v2, TaskIQ, Tailwind CSS
-- 006-user-roles-inbox-refactor: Added Python 3.11 (Backend), Node.js (Frontend) + FastAPI, SQLAlchemy, TaskIQ, RabbitMQ, Vite, React
 
 
 <!-- MANUAL ADDITIONS START -->
