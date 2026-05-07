@@ -1,34 +1,31 @@
 # Implementation Plan: Enhanced User Roles, Permissions and Navigation Refactor
 
-**Branch**: `006-user-roles-inbox-refactor` | **Date**: 2026-05-06 | **Spec**: [/specs/006-user-roles-inbox-refactor/spec.md](file:///mnt/D_DADOS/02_OPERACIONAL/TRABALHOS_ATIVOS/ALL_WORKS/Aryaraj/API%20-%20FluxAI/Projeto/o.c.a.ia-aryaraj-alternativ-branch/specs/006-user-roles-inbox-refactor/spec.md)
-
-**Input**: Refactoring the role system (Superadmin, Admin, Usuario Admin, Usuario), moving the Inbox to the sidebar, implementing invitation-based registration, and adding a "Global Context Variables" tab in the agents screen.
+**Branch**: `006-user-roles-inbox-refactor` | **Date**: 2026-05-07 | **Spec**: [spec.md](file:///mnt/D_DADOS/02_OPERACIONAL/TRABALHOS_ATIVOS/ALL_WORKS/Aryaraj/API - FluxAI/Projeto/o.c.a.ia-aryaraj-alternativ-branch/specs/006-user-roles-inbox-refactor/spec.md)
 
 ## Summary
 
-The feature refactors the FluxAI platform to support a multi-tier hierarchy and client-facing roles. It introduces secure registration via invitation links, moves frequently used navigation items (Inbox) to the sidebar for better UX, and isolates system configuration (Global Variables) from client users via a new tabbed interface in the Agents screen.
+This feature refactors the FluxAI role-based access control (RBAC) system to support a four-tier hierarchy: `SUPERADMIN`, `ADMIN` (Team), `USUARIO_ADMIN`, and `USUARIO` (Client). It includes significant UI/UX changes: moving the "Inbox de Dúvidas" to the sidebar, implementing invitation-only registration with 24h expiry, and strictly limiting UI element visibility based on roles. A unified promotion/demotion modal will be created for user management.
 
 ## Technical Context
 
-**Language/Version**: Python 3.11+, TypeScript (React 18+)  
-**Primary Dependencies**: FastAPI, TaskIQ, RabbitMQ, Pydantic v2, Tailwind CSS, shadcn/ui  
-**Storage**: PostgreSQL (SQLAlchemy + Alembic)  
-**Testing**: pytest (Backend), Vitest/Playwright (Frontend)  
-**Target Platform**: Linux (On-premise Docker deployment)
-**Project Type**: Web Application (Monorepo)  
-**Performance Goals**: <200ms API response time, invitation link generation <100ms  
-**Constraints**: Single-tenant deployment, mandatory PII protection in logs  
-**Scale/Scope**: Support for 4 distinct roles, ~10 screens/components updated
+**Language/Version**: Python 3.11+ (FastAPI), JavaScript (React 18+, Vite)  
+**Primary Dependencies**: FastAPI, SQLAlchemy, Alembic, TaskIQ, RabbitMQ, React, Vanilla CSS  
+**Storage**: PostgreSQL + pgvector  
+**Testing**: pytest (backend), Vitest/Playwright (frontend)  
+**Target Platform**: On-premise Docker deployment  
+**Project Type**: Web Service / Web Application  
+**Performance Goals**: Instant UI feedback, <200ms API response time for navigation  
+**Constraints**: Single-tenant, strict RBAC enforcement at both API and UI levels  
+**Scale/Scope**: ~10k users per instance, ~50 UI screens/components
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- **I. Canonical Tech Stack**: PASS. Using FastAPI, React, Tailwind, TaskIQ, RabbitMQ.
-- **II. Service Layer**: PASS. Logic will be in `auth_service.py` and `user_service.py`.
-- **III. Data Integrity**: PASS. Using Alembic for role enum updates and new Invitation table. Audit logs required for role changes.
-- **V. Security**: PASS. JWT-based auth, password hashing, rigid RBAC isolation.
-- **VIII. UI Integrity**: PASS. Navigation refactor and tabbed interface focus on clarity.
+- [x] **Role-Based Access**: The plan implements rigid isolation between Superadmin, Admin, and Client roles.
+- [x] **UX/UI Integrity**: Moving the Inbox to the sidebar improves system visibility and accessibility.
+- [x] **Secret management**: All role configuration and initial superadmin credentials are in `.env`.
+- [x] **Security by Design**: Authentication uses JWT, and the new invitation system prevents manual user injection.
 
 ## Project Structure
 
@@ -40,7 +37,6 @@ specs/006-user-roles-inbox-refactor/
 ├── research.md          # Phase 0 output
 ├── data-model.md        # Phase 1 output
 ├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
 └── tasks.md             # Phase 2 output
 ```
 
@@ -48,35 +44,61 @@ specs/006-user-roles-inbox-refactor/
 
 ```text
 backend/
-├── alembic/
-│   └── versions/        # Database migrations for roles and invitations
-├── models/
-│   ├── user.py          # Updated UserModel with 4 roles
-│   └── invitation.py    # New InvitationLinkModel
-├── services/
-│   ├── auth_service.py  # Link validation and registration logic
-│   └── user_service.py  # Role management and promotion logic
-└── api/
-    ├── routes/
-    │   ├── auth.py      # Registration link endpoints
-    │   └── users.py     # Refactored management endpoints
-    └── dependencies.py  # Role-based dependency injections
+├── main.py              # API routes and role guards
+├── models.py            # User and Invitation models
+├── services/            # Auth and logic for invitations
+└── tests/
 
 frontend/
 ├── src/
 │   ├── components/
-│   │   ├── Sidebar.jsx   # Moved Inbox item
-│   │   ├── UserList.jsx  # Removed Edit button, added Promote/Revoke
-│   │   └── AgentTabs.jsx # New tabs for Agents vs Globals
-│   ├── hooks/
-│   │   └── useRole.js    # Centralized permission check
-│   └── pages/
-│       └── Register.jsx  # New registration page with invitation check
+│   │   ├── Sidebar.jsx             # Updated with Inbox link
+│   │   ├── UserManagement.jsx      # Updated with unified modal
+│   │   ├── UnansweredQuestions.jsx # Moved logic
+│   │   ├── ChatPlayground.jsx      # Restricted UI (Tests/Prompt)
+│   │   ├── KnowledgeBaseManager.jsx# Restricted UI (Settings/Tabs)
+│   │   └── ConfigPanel.jsx         # Hidden for clients
+│   ├── pages/
+│   │   └── Register.jsx            # Updated for invitations
+│   └── services/                   # Auth and role helpers
 └── tests/
 ```
 
-**Structure Decision**: Web application (Monorepo) following the standard `backend/` and `frontend/` layout as mandated by the constitution.
+**Structure Decision**: Web application structure with distinct `backend` and `frontend` projects.
 
 ## Complexity Tracking
 
-*No violations identified.*
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| Multi-tier role logic in UI | Required for premium client experience and security. | Simple "if-admin" checks are insufficient for the four-role hierarchy. |
+
+## Phase 0: Outline & Research
+
+1. **Extract unknowns from Technical Context**:
+   - Research existing Invitation Link logic in `backend/main.py` and `models.py`.
+   - Verify current implementation of "Inbox de Dúvidas" in `UnansweredQuestions.jsx` and its API endpoints.
+   - Investigate how `ChatPlayground.jsx` and `KnowledgeBaseManager.jsx` currently render conditional buttons.
+
+2. **Generate and dispatch research agents**:
+   - Task: "Research `InvitationModel` usage and token validation logic for 24h expiry in `backend`."
+   - Task: "Identify all occurrences of 'Edit Prompt' and 'Database Settings' buttons in `frontend` for role-based hiding."
+   - Task: "Check `Sidebar.jsx` and `Dashboard.jsx` for existing tab/menu conditional rendering patterns."
+
+3. **Consolidate findings** in `research.md`.
+
+## Phase 1: Design & Contracts
+
+**Prerequisites:** `research.md` complete
+
+1. **Extract entities from feature spec** → `data-model.md`:
+   - `UserRole` enum update (if needed).
+   - `InvitationModel` attributes (token, expires_at, role).
+   - `AuditLogModel` for promotion actions.
+
+2. **Define interface contracts** → `/contracts/`:
+   - `POST /invitations/generate`: Generate 24h link.
+   - `GET /invitations/validate/{token}`: Check if link is valid.
+   - `POST /users/manage/role`: Unified endpoint for promotion/demotion.
+
+3. **Agent context update**:
+   - Run `.specify/scripts/bash/update-agent-context.sh agy`.

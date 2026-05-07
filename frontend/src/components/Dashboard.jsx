@@ -57,9 +57,9 @@ function AgentCard({ agent, kbList, onDelete, onDuplicate, onPause, onShare }) {
             </div>
 
             <div className={`card-footer ${isUsuario ? 'user-view' : ''}`}>
-                {!isUsuario && (
+                {isTeam && (
                     <button onClick={() => navigate(`/agent/${agent.id}`)} className="btn-primary">
-                        {isTeam ? '⚙️ Configurar' : '⚙️ Ver Config.'}
+                        ⚙️ Configurar
                     </button>
                 )}
                 <button

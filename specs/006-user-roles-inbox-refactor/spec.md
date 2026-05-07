@@ -3,7 +3,7 @@
 **Feature Branch**: `006-user-roles-inbox-refactor`  
 **Created**: 2026-05-06  
 **Status**: Draft  
-**Input**: User description: "tela do banco de dados tem uma aba para as perguntas frequentes (inbox de dúvidas) vamos mudar essa aba para o menu lateral e vamos atualizar o sistema de usuários, vamos ter o superadmin que consegue gerenciar tudo e remover admins e usuários normais, o admin que não vai poder remover nem adicionar nem o super admin nem outros admins mas vai poder adicionar/remover novos usuários, e em relação ao usuários vão ser 2 o usuário admin que vai poder adicionar e remover usuários e o usuário que não vai poder nem remover e nem adicionar outros. e em relação ao usuário admin e usuário eles vão ter acesso limitado ao sistema, eles terão acesso somente ao histórico de conversas do agente, podendo apagar ou iniciar uma nova conversa com o agente porém, não terá permissão de modificar o agente, a única coisa que poderá fazer é ativar ou desativar o agente, o usuário comum, terá as mesma permissões que o usuário admin mas não poderá nem ativar nem desativar o agente, em relação ao banco de dados tanto o usuário como o usuário admin poderão visualizar o conteúdo do banco de dados, porém somente o usuário admin poderá modificar o conteúdo do banco de dados ou adicionar novos, porém a unica forma de adicionar novos seão apenas atravez do botão '✨ Adicionar Novo' que abre o modal de 'Novo Conhecimento' as outras formas não estarão viziveis para o ususário admin nem para o usuário e em relação ao inbox de dúvidas, vamos deixar ele disponível para todos, ambos poderão responder as dúvidas, porém, somente os usuários admins poderão remover as pergunstas não respondidas. Em relação a tela de adiministração de usuários todos vão poder acessar porém o sistema de adicionar novos admins/usuários não será manual, você poderá gerar um link de acesso para a pessoa se cadastrar no sistema, esse link será único e ficará disponível por 24h após a criação, após esse tempo o link será invalidado e a pessoa não poderá mais se cadastrar no sistema, e em relação ao super admin será um usuário que será criado na inicialização do sistema, porém ele poderá conseder o título de super admin a outros admins, assim como também poderá remover o título de super admin de outros admins, assim como também poderá remover o título de super admin de si mesmo contanto que já tenha nomeado outro super admin. [CLARIFICATION: Roles are SUPERADMIN/ADMIN (System Team) and USUARIO_ADMIN/USUARIO (Clients)]."
+**Input**: User description: "tela do banco de dados tem uma aba para as perguntas frequentes (inbox de dúvidas) vamos mudar essa aba para o menu lateral e vamos atualizar o sistema de usuários, vamos ter o superadmin que consegue gerenciar tudo e remover admins e usuários normais, o admin que não vai poder remover nem adicionar nem o super admin nem outros admins mas vai poder adicionar/remover novos usuários, e em relação ao usuários vão ser 2 o usuário admin que vai poder adicionar e remover usuários e o usuário que não vai poder nem remover e nem adicionar outros. e em relação ao usuário admin e usuário eles vão ter acesso limitado ao sistema, eles terão acesso somente ao histórico de conversas do agente, podendo apagar ou iniciar uma nova conversa com o agente porém, não terá permissão de modificar o agente, a única thing que poderá fazer é ativar ou desativar o agente, o usuário comum, terá as mesma permissões que o usuário admin mas não poderá nem ativar nem desativar o agente, em relação ao banco de dados tanto o usuário como o usuário admin poderão visualizar o conteúdo do banco de dados, porém somente o usuário admin poderá modificar o conteúdo do banco de dados ou adicionar novos, porém a unica forma de adicionar novos seão apenas atravez do botão '✨ Adicionar Novo' que abre o modal de 'Novo Conhecimento' as outras formas não estarão viziveis para o ususário admin nem para o usuário e em relação ao inbox de dúvidas, vamos deixar ele disponível para todos, ambos poderão responder as dúvidas, porém, somente os usuários admins poderão remover as pergunstas não respondidas. Em relação a tela de adiministração de usuários todos vão poder acessar porém o sistema de adicionar novos admins/usuários não será manual, você poderá gerar um link de acesso para a pessoa se cadastrar no sistema, esse link será único e ficará disponível por 24h após a criação, após esse tempo o link será invalidado e a pessoa não poderá mais se cadastrar no sistema, e em relação ao super admin será um usuário que será criado na inicialização do sistema, porém ele poderá conseder o título de super admin a outros admins, assim como também poderá remover o título de super admin de outros admins, assim como também poderá remover o título de super admin de si mesmo contanto que já tenha nomeado outro super admin. [CLARIFICATION: Roles are SUPERADMIN/ADMIN (System Team) and USUARIO_ADMIN/USUARIO (Clients)]."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -16,7 +16,7 @@ The system distinguishes between **Team roles** (Superadmin, Admin) and **Client
 - **Admin:** System maintenance. Can add/remove Client accounts (`USUARIO_ADMIN`, `USUARIO`). Cannot manage Team roles.
 
 **Client Roles (External):**
-- **Usuario Admin:** Power user client. Can add/remove other `USUARIO_ADMIN` and `USUARIO` accounts. Cannot modify system settings.
+- **Usuario Admin:** Power user client. Can add/remove other `USUARIO_ADMIN` and `USUARIO` accounts. Can promote `USUARIO` to `USUARIO_ADMIN` and demote `USUARIO_ADMIN` to `USUARIO` within their context. Cannot modify system settings.
 - **Usuario:** Regular client user. No management permissions.
 
 **Why this priority**: Core security and access control mechanism.
@@ -25,21 +25,21 @@ The system distinguishes between **Team roles** (Superadmin, Admin) and **Client
 **Acceptance Scenarios**:
 1. **Given** a Superadmin logged in, **When** viewing the user list, **Then** they can promote an Admin to Superadmin or demote themselves (if another Superadmin exists).
 2. **Given** an Admin logged in, **When** attempting to manage users, **Then** they can add/remove `USUARIO_ADMIN` or `USUARIO` but cannot see or edit `SUPERADMIN` or other `ADMIN` accounts.
-3. **Given** a `USUARIO_ADMIN` logged in, **When** managing users, **Then** they can add or remove `USUARIO_ADMIN` and `USUARIO` accounts from their own client context.
+3. **Given** a `USUARIO_ADMIN` logged in, **When** managing users, **Then** they can add or remove `USUARIO_ADMIN` and `USUARIO` accounts, and use a modal to change roles between these two types.
 
 ---
 
 ### User Story 2 - Restricted Agent & Database Access (Priority: P1)
 
-Admins and Users have limited access to the agent configuration but can interact with history and the knowledge base.
+Admins and Users have limited access to the agent configuration but can interact with history and the knowledge base. Interface is simplified for Client roles.
 
 **Why this priority**: Ensures that non-Superadmin users cannot break the core agent configuration while still allowing them to manage data.
-**Independent Test**: Verify that Admins can toggle the agent but not edit its prompt/settings, and that Users can only view the agent state.
+**Independent Test**: Verify that Admins can toggle the agent but not edit its prompt/settings, and that Users can only view the agent state. Check visibility of restricted buttons.
 
 **Acceptance Scenarios**:
-1. **Given** a `USUARIO_ADMIN`, **When** viewing the agent screen, **Then** they see the toggle to activate/deactivate but cannot see "Edit Prompt" or "Save Changes" for configuration.
-2. **Given** a `USUARIO`, **When** viewing the database, **Then** they see the records but no "Add" or "Edit" buttons are visible.
-3. **Given** a `USUARIO_ADMIN`, **When** in the database screen, **Then** they can modify existing entries and add new ones ONLY via the "✨ Adicionar Novo" modal.
+1. **Given** a `USUARIO_ADMIN`, **When** viewing the agent card, **Then** the "Ver configuração" button is hidden.
+2. **Given** a `USUARIO_ADMIN` or `USUARIO` in Chat, **Then** the "Editar prompt" button is hidden, and the "Tests" menu shows only messages, tokens, investment, and reset.
+3. **Given** any Client role in the Database, **Then** the "Configurações" button on cards is hidden, and the "Identificação" tab in content view is missing.
 
 ---
 
@@ -95,9 +95,14 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - **FR-011**: Inbox access: All roles can view and reply to questions.
 - **FR-012**: Inbox cleanup: Only Team roles (`SUPERADMIN`, `ADMIN`) can delete questions that have not been answered.
 - **FR-013**: User Creation: System MUST generate a unique, single-use registration link valid for 24 hours. Manual user creation forms MUST be removed for all management screens.
-- **FR-017**: User Management MUST NOT have an "Edit" button for any role. Role promotion/demotion actions (`SUPERADMIN` only) MUST be implemented as independent action buttons.
+- **FR-017**: User Management MUST implement a unified "Promote/Demote" button that opens a modal to manage user roles. This action is available to `SUPERADMIN` (all roles) and `USUARIO_ADMIN` (for other `USUARIO_ADMIN` and `USUARIO` accounts).
 - **FR-018**: The "Meus Agentes" screen MUST be refactored to a tabbed interface with two tabs: "Meus Agentes" and "Variáveis de Contexto Globais".
 - **FR-019**: The "Variáveis de Contexto Globais" tab MUST ONLY be visible to `SUPERADMIN` and `ADMIN` roles. For `USUARIO_ADMIN` and `USUARIO`, the entire tab bar MUST be hidden, showing only the agents list.
+- **FR-020**: System MUST hide the following buttons for Client roles (`USUARIO_ADMIN`, `USUARIO`): "Ver configuração" (Agent Card), "Editar prompt" (Chat), and "Configurações" (Database Card). These buttons remain visible for Team roles (`SUPERADMIN`, `ADMIN`).
+- **FR-021**: System MUST simplify UI for Client roles:
+    - Chat "Tests" menu: Show only Message Count, Tokens Spent, Investment, and Reset button.
+    - Database Content View: Hide "Identificação" tab, showing only "Conteúdo" tab.
+    - Team roles (`SUPERADMIN`, `ADMIN`) MUST continue to see full information and all tabs.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -135,3 +140,9 @@ The "Inbox" (FAQ/Doubts) is moved from a database tab to a top-level sidebar ite
 - Q: How to handle Knowledge Base addition buttons for clients? → A: Hide all advanced/bulk methods, only show "Adicionar Novo" for Usuario Admin.
 - Q: By removing the "editar" button for all roles in User Management, should the Superadmin still have independent buttons to "Promote/Revoke" status? → A: Yes, dedicated buttons for these actions remain only for Superadmins.
 - Q: How should the "Meus Agentes" screen behave for users without access to Global Variables? → A: The tab bar must be hidden entirely, displaying only the agents list.
+
+### Session 2026-05-07
+- Q: Who does the promotion power refer to in point 4? → A: To the **USUARIO_ADMIN (Client)** role, who can promote/demote between `USUARIO` and `USUARIO_ADMIN`.
+- Q: Should configuration buttons be hidden for the Team? → A: No, they remain visible for `SUPERADMIN` and `ADMIN` (Team) and are hidden only for Clients (`USUARIO_ADMIN` and `USUARIO`).
+- Q: Should interface simplifications (Tests menu and tabs) apply to everyone? → A: No, apply only to **Clients**. The Team continues to see full information and all tabs.
+- Q: Should the promotion/demotion function be a single button? → A: Yes, a single button that opens a modal for these actions.

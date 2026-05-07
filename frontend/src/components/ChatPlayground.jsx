@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { API_URL } from '../config';
 import ConfirmModal from './ConfirmModal';
-
-
+import { useRole } from '../hooks/useRole';
 
 const ChatPlayground = () => {
+    const { isTeam, isUsuarioAdmin, isSuperAdmin, isAdmin } = useRole();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const initialAgentId = queryParams.get('agentId');
@@ -1723,10 +1723,10 @@ const ChatPlayground = () => {
                                         </span>
                                     </div>
 
-                                    {isTesterMode && (
-                                        <div className="tester-controls fade-in">
+                                    {isTesterMode && isTeam && (
+                                        <div className="stress-test-panel fade-in" style={{ padding: '1rem', background: 'rgba(244, 63, 94, 0.05)', borderRadius: '12px', border: '1px solid rgba(244, 63, 94, 0.2)', marginBottom: '1rem' }}>
                                             <div className="control-group">
-                                                <label style={{ fontSize: '0.75rem', opacity: 0.7 }}>PERSONA DO TESTADOR</label>
+                                                <label style={{ color: '#f43f5e', fontSize: '0.8rem', fontWeight: 'bold' }}>👤 PERSONA DO TESTADOR</label>
                                                 <select
                                                     value={testerPersona}
                                                     onChange={(e) => setTesterPersona(e.target.value)}
@@ -1780,23 +1780,27 @@ const ChatPlayground = () => {
                                                 </div>
                                             </div>
 
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                                                <div className="battle-toggle" style={{ border: '1px solid rgba(244, 63, 94, 0.2)', padding: '8px', borderRadius: '8px' }}>
-                                                    <label className="toggle-switch">
-                                                        <input type="checkbox" checked={testerKnowsPrompt} onChange={(e) => setTesterKnowsPrompt(e.target.checked)} />
-                                                        <span className="slider round" style={{ backgroundColor: testerKnowsPrompt ? '#f43f5e' : '' }}></span>
-                                                    </label>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Modo White Box 📖</span>
-                                                        <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>O Tester lerá o prompt do agente antes.</span>
+                                            <div className="control-group" style={{ marginTop: '12px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setIsBipolar(!isBipolar)}>
+                                                    <div style={{
+                                                        width: '36px',
+                                                        height: '18px',
+                                                        borderRadius: '18px',
+                                                        background: isBipolar ? '#f43f5e' : 'rgba(255,255,255,0.1)',
+                                                        position: 'relative',
+                                                        transition: 'all 0.3s'
+                                                    }}>
+                                                        <div style={{
+                                                            width: '14px',
+                                                            height: '14px',
+                                                            borderRadius: '50%',
+                                                            background: 'white',
+                                                            position: 'absolute',
+                                                            top: '2px',
+                                                            left: isBipolar ? '20px' : '2px',
+                                                            transition: 'all 0.3s'
+                                                        }}></div>
                                                     </div>
-                                                </div>
-
-                                                <div className="battle-toggle" style={{ border: '1px solid rgba(244, 63, 94, 0.2)', padding: '8px', borderRadius: '8px' }}>
-                                                    <label className="toggle-switch">
-                                                        <input type="checkbox" checked={testerIsDynamic} onChange={(e) => setTesterIsDynamic(e.target.checked)} />
-                                                        <span className="slider round" style={{ backgroundColor: testerIsDynamic ? '#f43f5e' : '' }}></span>
-                                                    </label>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                         <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Modo Bipolar 🌀</span>
                                                         <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>O humor muda conforme a conversa.</span>
@@ -1834,48 +1838,56 @@ const ChatPlayground = () => {
                                     )}
                                 </div>
 
-                                <div className="control-group">
-                                    <label>🤖 Modelo Principal</label>
-                                    <select value={mainModelOverride} onChange={(e) => setMainModelOverride(e.target.value)}>
-                                        <option value="">(Usar Padrão do Agente)</option>
-                                        {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
-                                    </select>
-                                </div>
+                                    {isTeam && (
+                                        <>
+                                            <div className="control-group">
+                                                <label>🤖 Modelo Principal</label>
+                                                <select value={mainModelOverride} onChange={(e) => setMainModelOverride(e.target.value)}>
+                                                    <option value="">(Usar Padrão do Agente)</option>
+                                                    {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                                </select>
+                                            </div>
 
-                                {isBattleMode && (
-                                    <div className="arena-challenger-config fade-in" style={{ padding: '1rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)', marginTop: '0.5rem' }}>
-                                        <div className="control-group">
-                                            <label>🧠 Modelo do Desafiante (Arena)</label>
-                                            <select value={challengerModelOverride} onChange={(e) => setChallengerModelOverride(e.target.value)}>
-                                                <option value="">(Usar Padrão do Agente)</option>
-                                                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-                                )}
+                                            {isBattleMode && (
+                                                <div className="arena-challenger-config fade-in" style={{ padding: '1rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)', marginTop: '0.5rem' }}>
+                                                    <div className="control-group">
+                                                        <label>🧠 Modelo do Desafiante (Arena)</label>
+                                                        <select value={challengerModelOverride} onChange={(e) => setChallengerModelOverride(e.target.value)}>
+                                                            <option value="">(Usar Padrão do Agente)</option>
+                                                            {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
 
-                                <div className="context-card">
-                                    <h4>🌍 Contexto</h4>
-                                    {globalVars.filter(gv => !gv.key.startsWith('PUBLIC_ACCESS_TOKEN_')).map(gv => (
-                                        <div key={gv.id} className="context-field-group">
-                                            <label>{gv.key.toUpperCase().replace('_', ' ')}</label>
-                                            <input
-                                                value={contextVars[gv.key] !== undefined ? contextVars[gv.key] : gv.value}
-                                                onChange={(e) => setContextVars({ ...contextVars, [gv.key]: e.target.value })}
-                                                placeholder={`Padrão: ${gv.value}`}
-                                            />
+                                    {isTeam && (
+                                        <div className="context-card">
+                                            <h4>🌍 Contexto</h4>
+                                            {globalVars.filter(gv => !gv.key.startsWith('PUBLIC_ACCESS_TOKEN_')).map(gv => (
+                                                <div key={gv.id} className="context-field-group">
+                                                    <label>{gv.key.toUpperCase().replace('_', ' ')}</label>
+                                                    <input
+                                                        value={contextVars[gv.key] !== undefined ? contextVars[gv.key] : gv.value}
+                                                        onChange={(e) => setContextVars({ ...contextVars, [gv.key]: e.target.value })}
+                                                        placeholder={`Padrão: ${gv.value}`}
+                                                    />
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    )}
 
                                 <div className="stats-container-premium">
-                                    <div className="session-id-row" onClick={() => {
-                                        navigator.clipboard.writeText(sessionId);
-                                        showToast('Session ID copiado! 📋', 'success');
-                                    }} title="Clique para copiar o Session ID">
-                                        <span className="session-id-label">ID DA SESSÃO 📋</span>
-                                        <code className="session-id-value">{sessionId}</code>
-                                    </div>
+                                    {isTeam && (
+                                        <div className="session-id-row" onClick={() => {
+                                            navigator.clipboard.writeText(sessionId);
+                                            showToast('Session ID copiado! 📋', 'success');
+                                        }} title="Clique para copiar o Session ID">
+                                            <span className="session-id-label">ID DA SESSÃO 📋</span>
+                                            <code className="session-id-value">{sessionId}</code>
+                                        </div>
+                                    )}
 
                                     <div className="stats-grid-modern">
                                         <div className="modern-stat-card">
@@ -2107,7 +2119,7 @@ const ChatPlayground = () => {
                             <h3>{agents.find(a => a.id === selectedAgentId)?.name || 'Agente Inteligente'}</h3>
                             <p>Assitente Virtual Nativo</p>
                         </div>
-                        {selectedAgentId && (
+                        {isTeam && selectedAgentId && (
                             <a
                                 href={`/agent/${selectedAgentId}?tab=prompts`}
                                 style={{

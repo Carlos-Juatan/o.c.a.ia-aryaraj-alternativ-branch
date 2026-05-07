@@ -458,30 +458,51 @@ async def update_user_role(
     user_id: int, 
     req: RoleUpdate, 
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(check_role([UserRole.SUPERADMIN.value]))
+    current_user: dict = Depends(check_role([UserRole.SUPERADMIN.value, UserRole.ADMIN.value, UserRole.USUARIO_ADMIN.value]))
 ):
-    """Permite que um Superadmin altere o papel de qualquer usuário."""
+    """Permite que administradores alterem o papel de usuários respeitando a hierarquia."""
     result = await db.execute(select(UserModel).where(UserModel.id == user_id))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    if req.role not in [r.value for r in UserRole]:
+    current_role = current_user["role"]
+    new_role = req.role
+
+    if new_role not in [r.value for r in UserRole]:
         raise HTTPException(status_code=400, detail="Papel inválido")
 
-    # Proteção: Se estiver despromovendo um Superadmin, garante que não seja o único
-    if db_user.role == UserRole.SUPERADMIN.value and req.role != UserRole.SUPERADMIN.value:
-        count_res = await db.execute(select(func.count(UserModel.id)).where(UserModel.role == UserRole.SUPERADMIN.value))
-        count = count_res.scalar()
-        if count <= 1:
-            raise HTTPException(status_code=400, detail="Não é possível despromover o último Super Admin.")
+    # Regras de Hierarquia:
+    # 1. SUPERADMIN pode tudo (exceto despromover o último superadmin)
+    # 2. ADMIN pode promover/despromover entre USUARIO, USUARIO_ADMIN e ADMIN, mas não pode mexer com SUPERADMIN
+    # 3. USUARIO_ADMIN só pode promover/despromover entre USUARIO e USUARIO_ADMIN
+    
+    if current_role == UserRole.SUPERADMIN.value:
+        # Proteção: Se estiver despromovendo um Superadmin, garante que não seja o único
+        if db_user.role == UserRole.SUPERADMIN.value and new_role != UserRole.SUPERADMIN.value:
+            count_res = await db.execute(select(func.count(UserModel.id)).where(UserModel.role == UserRole.SUPERADMIN.value))
+            count = count_res.scalar()
+            if count <= 1:
+                raise HTTPException(status_code=400, detail="Não é possível despromover o último Super Admin.")
+    
+    elif current_role == UserRole.ADMIN.value:
+        if db_user.role == UserRole.SUPERADMIN.value:
+            raise HTTPException(status_code=403, detail="Administradores não podem alterar o papel de um Super Admin.")
+        if new_role == UserRole.SUPERADMIN.value:
+            raise HTTPException(status_code=403, detail="Administradores não podem promover para Super Admin.")
+            
+    elif current_role == UserRole.USUARIO_ADMIN.value:
+        if db_user.role in [UserRole.SUPERADMIN.value, UserRole.ADMIN.value]:
+            raise HTTPException(status_code=403, detail="Você não tem permissão para alterar o papel deste usuário.")
+        if new_role not in [UserRole.USUARIO.value, UserRole.USUARIO_ADMIN.value]:
+            raise HTTPException(status_code=403, detail="Você só pode promover usuários para o nível de Usuário ou Usuário Admin.")
 
     old_role = db_user.role
-    db_user.role = req.role
+    db_user.role = new_role
     await db.commit()
     
     from services.audit_service import AuditLogger
-    await AuditLogger.log(db, "PROMOTE_USER", {"target_id": user_id, "old_role": old_role, "new_role": req.role}, user_id=current_user["id"])
+    await AuditLogger.log(db, "PROMOTE_USER", {"target_id": user_id, "old_role": old_role, "new_role": new_role}, user_id=current_user["id"])
     
     return {"success": True, "new_role": db_user.role}
 

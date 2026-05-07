@@ -183,14 +183,16 @@ function KnowledgeBaseList() {
                                     <Link to={`/knowledge-bases/${base.id}?view=content`} className="access-btn">
                                         {isTeam ? 'Editar Conteúdo' : 'Ver Conteúdo'}
                                     </Link>
-                                    <Link 
-                                        to={`/knowledge-bases/${base.id}?view=metadata`} 
-                                        className="delete-btn" 
-                                        style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}
-                                        title="Configurações da Base"
-                                    >
-                                        ⚙️
-                                    </Link>
+                                    {isTeam && (
+                                        <Link 
+                                            to={`/knowledge-bases/${base.id}?view=metadata`} 
+                                            className="delete-btn" 
+                                            style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}
+                                            title="Configurações da Base"
+                                        >
+                                            ⚙️
+                                        </Link>
+                                    )}
                                     {isTeam && (
                                         <button
                                             onClick={(e) => handleDeleteClick(e, base.id, base.name)}
